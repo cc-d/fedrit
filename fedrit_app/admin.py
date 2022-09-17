@@ -7,8 +7,16 @@ class SubAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     pass
 
+@admin.action(description='Generate PGP key for an existing PGP record.')
+def gen_pgp_action(modeladmin, request, queryset):
+    for pgp in queryset:
+        pgp.generate_key()
+
 class PGPAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['key_type', 'key_length', 'name_real', 'name_email',
+                    'name_comment', 'fingerprint']
+    actions = [gen_pgp_action]
+    exclude = ('fingerprint',)
 
 admin.site.register(Sub, SubAdmin)
 admin.site.register(Post, PostAdmin)
