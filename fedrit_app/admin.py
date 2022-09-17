@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SiteUser, Sub, Post
+from .models import SiteUser, Sub, Post, PGP
 
 class SubAdmin(admin.ModelAdmin):
     pass#fields = [dstr for dstr in dir(Sub) if dstr[0] != '_']
@@ -7,5 +7,9 @@ class SubAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     pass
 
+class PGPAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(Sub, SubAdmin)
 admin.site.register(Post, PostAdmin)
+admin.site.register(PGP, PGPAdmin)

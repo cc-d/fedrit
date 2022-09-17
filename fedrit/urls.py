@@ -17,6 +17,7 @@ from fedrit_app.admin import admin
 from django.urls import path, include
 from rest_framework import routers
 from api import views as apiviews
+from staff import views as staffviews
 
 router = routers.DefaultRouter()
 api_serials = [att for att in dir(apiviews) if att.find('ViewSet') != -1]
@@ -29,4 +30,5 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('', include('fedrit_app.urls')),
     path('admin/', admin.site.urls),
+    path('staff/', include('staff.urls')),
 ]
