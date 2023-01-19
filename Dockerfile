@@ -16,14 +16,17 @@ RUN apt-get upgrade -y
 # assumed 3.10
 RUN apt-get install python3 python3-pip python3-venv git nodejs npm -y
 
-RUN git clone https://github.com/cc-d/fedrit.git
-WORKDIR fedrit/
+ARG GITURL=https://github.com/cc-d/fedrit.git
+RUN git clone $GITURL
 
-RUN npm install --prefix frontend
+WORKDIR fedrit/
 
 RUN python3 -m venv venv
 RUN . venv/bin/activate
 RUN pip install -r requirements.txt
+
+RUN npm install --prefix frontend
+
 
 EXPOSE 8000
 EXPOSE 3000
