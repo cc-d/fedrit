@@ -21,6 +21,10 @@ WORKDIR fedrit/
 
 RUN npm install --prefix frontend
 
+RUN python3 -m venv venv
+RUN . venv/bin/activate
+RUN pip install -r requirements.txt
+
 EXPOSE 8000
 EXPOSE 3000
 
