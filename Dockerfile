@@ -13,13 +13,15 @@ WORKDIR $APP_DIR
 RUN apt-get update
 RUN apt-get upgrade -y
 
-# assumed 3.10
-RUN apt-get install python3 python3-pip python3-venv git nodejs npm -y
+# assumed python 3.10
+RUN apt-get install python3 python3-pip python3-venv git nodejs npm gnupg -y
+RUN apt-get install nginx -y
 
 ARG GITURL=https://github.com/cc-d/fedrit.git
 RUN git clone $GITURL
 
 WORKDIR fedrit/
+COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN python3 -m venv venv
 RUN . venv/bin/activate
@@ -31,4 +33,4 @@ RUN npm install --prefix frontend
 EXPOSE 8000
 EXPOSE 3000
 
-CMD ["sh", "-c", "python3 fedrit/manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend"]
+CMD ["sh", "-c", "python3 fedrit/manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend & nginx -g \"daemon off;\""]
