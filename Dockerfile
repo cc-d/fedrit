@@ -14,7 +14,7 @@ RUN apt-get update
 RUN apt-get upgrade -y
 
 # assumed python 3.10
-RUN apt-get install python3 python3-pip python3-venv git nodejs npm gnupg -y
+RUN apt-get install python3 python3-pip python3-venv git nodejs npm gnupg nginx -y
 RUN apt-get install nginx -y
 
 ARG GITURL=https://github.com/cc-d/fedrit.git
