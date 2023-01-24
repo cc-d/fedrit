@@ -24,11 +24,7 @@ class GlobalPlatform(models.Model):
 class GlobalUser(models.Model):
     id = models.UUIDField(primary_key=True)
     origin_platform = models.OneToOneField(GlobalPlatform)
-
-
-class PlatformUser(models.Model):
-    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE)
-    platform = models.OneToOneField(GlobalPlatform, on_delete=models.CASCADE)
+    ggpgkey = models.ForeignKey(GPGKey, null=True, blank=True, on_delete=models.DO_NOTHING)
 
 
 class Community(models.Model):
@@ -51,11 +47,12 @@ class CommunityBan(models.Model):
     user = models.OneToOneField(PlatformUser, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    upd6ated_at = models.DateTimeField(auto_now=True)
     
 
 class CommunityPost(models.Model):
     author = models.OneToOneField()
+    
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
