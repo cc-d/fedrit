@@ -4,16 +4,15 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
-    User, PlatformUser, Platform
+    User, PlatformUser, Platform, host_platform
 )
 from .utils import valid_name, valid_url
-from ..fedrit.settings import HOST_PLATFORM
+from fedrit.settings import HOST_PLATFORM
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-@ts_interface()
 class PlatformUserSerializer(serializers.ModelSerializer):
     token = serializers.CharField(allow_blank=True, read_only=True)
 
@@ -31,22 +30,29 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         user_obj = None
         username = data.get('username', None)
         password = data.get('password', None)
-        platform = data.get('platform', Platform.host_platform.name)
+        platform = data.get('platform', None)
 
         if not username or not password:
             raise serializers.ValidationError('missing username or password')
-        elif not valid_name(username, 'username') or \
-            not valid_name(platform):
-            raise serializers.ValidationError('invalid platform or username')
+        elif not valid_name(username, 'username'):
+            raise serializers.ValidationError('invalid username')
         elif password is not None and len(str(password)) < 8:
             raise serializers.ValidationError('password too short')
-        
-        platform = Platform.objects.filter(name__iexact=platform).distinct()
-        if not platform.exists():
-            raise serializers.ValidationError('platform does not exist')
-        else:
-            data['platform'] = platform.first().name
 
+        if platform is not None:
+            if not valid_name(platform):
+                raise serializers.ValidationError('invalid platform name')
+
+            platform = Platform.objects.filter(
+                name__iexact=platform).distinct()
+
+            if not platform.exists():
+                raise serializers.ValidationError('platform does not exist')
+            else:
+                data['platform'] = platform.first().name
+        else:
+            platform = host_platform()
+            data['platform'] = platform.name
         return data
 
     def create(self, validated_data):

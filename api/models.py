@@ -8,7 +8,7 @@ from django.contrib.auth.models import (
 )
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
-from ..fedrit.settings import HOST_PLATFORM
+from fedrit.settings import HOST_PLATFORM
 from rest_framework.authtoken.models import Token
 
 import logging
@@ -41,21 +41,18 @@ class Platform(models.Model):
     def __repr__(self):
         return f'<GlobalPlatform domain={self.domain}>'
 
-    @property
-    def host_platform(self):
-        """ Retrieves current host platform, creates if it does not exist. """
-        return Platform.objects.get_or_create(
-            name=HOST_PLATFORM['name'], domain=HOST_PLATFORM['domain'])
+def host_platform() -> Platform:
+    Platform.objects.get_or_create(
+        name=HOST_PLATFORM['name'], domain=HOST_PLATFORM['domain'])
 
 
 class PlatformUser(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # original platform attributes
-    platform = models.OneToOneField(
-        Platform, default=Platform.host_platform, on_delete=models.CASCADE)
+    platform = models.OneToOneField(Platform, on_delete=models.CASCADE)
 
-    username = models.CharField(max_length=30)
+    username = models.CharField(max_length=30, unique=True)
 
     pgpkey = models.ForeignKey(
         PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
@@ -79,7 +76,6 @@ class PlatformUser(AbstractUser):
         user.save()
         Token.objects.create(user=user)
         return user
-
 
 
 class Community(models.Model):
