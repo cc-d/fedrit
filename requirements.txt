@@ -21,4 +21,5 @@ tomli==2.0.1
 types-pytz==2022.7.1.0
 types-PyYAML==6.0.12.3
 typing_extensions==4.4.0
+tzdata==2022.7
 Werkzeug==2.2.2
