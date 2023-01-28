@@ -1,9 +1,18 @@
 import string
+from uuid import uuid4
 from datetime import datetime, timedelta
 from django.db import models
-from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import (
+    User, AbstractUser, AbstractBaseUser
+)
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
+from ..fedrit.settings import HOST_PLATFORM
+from rest_framework.authtoken.models import Token
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class PGPKey(models.Model):
@@ -18,9 +27,10 @@ class PGPKey(models.Model):
 
 
 class Platform(models.Model):
-    uuid = models.UUIDField(primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     name = models.CharField(max_length=30, unique=True)
+    domain = models.CharField(max_length=255, unique=True)
 
     pgpkey = models.ForeignKey(
         PGPKey, blank=True, null=True, on_delete=models.DO_NOTHING)
@@ -31,26 +41,50 @@ class Platform(models.Model):
     def __repr__(self):
         return f'<GlobalPlatform domain={self.domain}>'
 
+    @property
+    def host_platform(self):
+        """ Retrieves current host platform, creates if it does not exist. """
+        return Platform.objects.get_or_create(
+            name=HOST_PLATFORM['name'], domain=HOST_PLATFORM['domain'])
 
-class PlatformUser(models.Model):
-    uuid = models.UUIDField(primary_key=True)
+
+class PlatformUser(AbstractUser):
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # original platform attributes
-    origin_platform = models.OneToOneField(
-        Platform, on_delete=models.DO_NOTHING)
-    origin_username = models.CharField(max_length=30)
+    platform = models.OneToOneField(
+        Platform, default=Platform.host_platform, on_delete=models.CASCADE)
+
+    username = models.CharField(max_length=30)
 
     pgpkey = models.ForeignKey(
         PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
-    user = models.OneToOneField(
-        User, blank=True, null=True, on_delete=models.DO_NOTHING)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return f'<GlobalUser {self.id}>'
+        return (f'<GlobalUser {self.uuid} ' \
+            f'username={self.username} platform={self.platform} >')
+
+    def create_user(self, username, password, platform=None):
+        """ creates new PlatformUser assumes validated in serializer """
+        if not username or not password:
+            raise ValueError('Missing username, password')
+        if platform is None:
+            platform = Platform.host_platform
+
+        user = PlatformUser(username=username, platform=platform)
+        user.set_password(password)
+        user.save()
+        Token.objects.create(user=user)
+        return user
+
 
 
 class Community(models.Model):
-    uuid = models.UUIDField(primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+
     COMMUNITY_TYPES = (
         ('SUB', 'Subreddit'),
         ('IMGBOARD', 'ImageBoard'),
@@ -71,7 +105,7 @@ class Community(models.Model):
 
 
 class CommunityPost(models.Model):
-    uuid = models.UUIDField(primary_key=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # post attributes
     author = models.OneToOneField(

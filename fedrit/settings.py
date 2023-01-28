@@ -9,12 +9,33 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import logging
 from pathlib import Path
+
+##### Custom Vars #####
+HOST_PLATFORM = {
+    'name': 'fedrit',
+    'domain': 'fedrit.com'
+}
+
+AUTH_USER_MODEL = 'api.PlatformUser'
+
+LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)d | %(message)s'
+LOGLEVEL = logging.DEBUG
+
+logging.basicConfig(
+    level=LOGLEVEL,
+    format=LOGFORMAT,
+    handlers=[logging.StreamHandler()],
+)
+
+logger = logging.getLogger(__name__)
+
+##### End Custom Vars #####
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -27,7 +48,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
     'api'
 ]
 
