@@ -57,7 +57,6 @@ class Community(models.Model):
 
 class CommunityPost(models.Model):
     author = models.OneToOneField()
-    
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
