@@ -28,8 +28,9 @@ class GlobalPlatform(models.Model):
 
 
 class GlobalUser(models.Model):
-    id = models.UUIDField(primary_key=True)
+    uuid = models.UUIDField(primary_key=True)
     origin_platform = models.OneToOneField(GlobalPlatform)
+    origin_username = models.CharField(max_length=255)
     pgpkey = models.ForeignKey(PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
     user = models.OneToOneField(User, blank=True, null=True, on_delete=models.DO_NOTHING)
 
