@@ -35,4 +35,4 @@ EXPOSE 8000
 EXPOSE 3000
 EXPOSE 80
 
-#CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend & nginx -g \"daemon off;\""]
+CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend & nginx -g \"daemon off;\""]
