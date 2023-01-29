@@ -1,4 +1,4 @@
-from django_typomatic import ts_interface, get_ts
+from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -68,4 +68,4 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         return user
 
 
-
+generate_ts('../frontend/types.ts')

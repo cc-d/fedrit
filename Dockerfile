@@ -18,14 +18,14 @@ RUN apt-get install python3 python3-pip python3-venv git nodejs npm gnupg nginx 
 RUN apt-get install nginx -y
 
 ARG GITURL=https://github.com/cc-d/fedrit.git
-RUN git clone $GITURL # cachebreak2
+RUN git clone $GITURL # 12321123
 
 WORKDIR fedrit/
 COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN python3 -m venv venv
 RUN . venv/bin/activate
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt # cahebreak
 RUN python3 manage.py makemigrations
 RUN python3 manage.py migrate
 
@@ -35,4 +35,4 @@ EXPOSE 8000
 EXPOSE 3000
 EXPOSE 80
 
-CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend & nginx -g \"daemon off;\""]
+#CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8000 & npm start --prefix frontend & nginx -g \"daemon off;\""]
