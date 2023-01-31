@@ -13,18 +13,17 @@ from fedrit.settings import HOST_PLATFORM
 import logging
 logger = logging.getLogger(__name__)
 
-
+@ts_interface()
 class PlatformUserSerializer(serializers.ModelSerializer):
     token = serializers.CharField(allow_blank=True, read_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ('uuid', 'username', 'password', 'token', 'platform')
+        fields = ('uuid', 'platform', 'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True},
-            'uuid': {'required': False},
             'platform': {'required': False},
-            'uuid': {'required': False, 'read_only': True}
+            'uuid': {'required': False}
         }
 
     def validate(self, data):
@@ -70,5 +69,4 @@ class PlatformUserSerializer(serializers.ModelSerializer):
             username=username, password=password, platform=platform)
         return user
 
-
-generate_ts('../frontend/types.ts')
+generate_ts('frontend/types.ts')
