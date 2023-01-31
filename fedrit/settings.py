@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import logging
+import string
 from pathlib import Path
 
 ##### Custom Vars #####
@@ -31,6 +32,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+VALID_CHARS = string.ascii_letters + string.digits + '_' + '-'
+VALID_NAME_LEN_MAX = 30
+VALID_NAME_CHARS = string.ascii_letters + string.digits + '_' + '-'
 ##### End Custom Vars #####
 
 

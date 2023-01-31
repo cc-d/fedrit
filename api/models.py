@@ -2,13 +2,16 @@ import string
 from uuid import uuid4
 from datetime import datetime, timedelta
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import (
     User, AbstractUser, AbstractBaseUser
 )
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
-from fedrit.settings import HOST_PLATFORM
+from fedrit.settings import (
+    HOST_PLATFORM, VALID_NAME_LEN_MAX, VALID_CHARS
+)
 from rest_framework.authtoken.models import Token
 
 import logging
@@ -29,8 +32,8 @@ class PGPKey(models.Model):
 class Platform(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
-    name = models.CharField(max_length=30, unique=True)
-    domain = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=VALID_NAME_LEN_MAX)
+    domain = models.CharField(max_length=255)
 
     #pgpkey = models.ForeignKey(
     #    PGPKey, blank=True, null=True, on_delete=models.DO_NOTHING)
@@ -39,20 +42,33 @@ class Platform(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return f'<GlobalPlatform domain={self.domain}>'
+        return f'<Platform {self.name} {self.uuid}>'
+
+    def __str__(self):
+        return f'<Platform {self.name}>'
 
 def host_platform() -> Platform:
-    Platform.objects.get_or_create(
-        name=HOST_PLATFORM['name'], domain=HOST_PLATFORM['domain'])
+    print('hosterd platform')
+    host = Platform.objects \
+        .filter(name=HOST_PLATFORM['name']) \
+        .filter(domain=HOST_PLATFORM['domain']) \
+        .first()
+    print('hothost',host)
+
+    if not host:
+        host = Platform.objects.create(
+            name=HOST_PLATFORM['name'],
+            domain=HOST_PLATFORM['domain'])
+    return host
 
 
 class PlatformUser(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # original platform attributes
-    platform = models.OneToOneField(Platform, on_delete=models.CASCADE)
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
 
-    username = models.CharField(max_length=30, unique=True)
+    origin_username = models.CharField(max_length=VALID_NAME_LEN_MAX)
 
     #pgpkey = models.ForeignKey(
     #    PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
@@ -61,21 +77,34 @@ class PlatformUser(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return (f'<GlobalUser {self.uuid} ' \
-            f'username={self.username} platform={self.platform} >')
+        return (f'<PlatformUser {self.username} {self.uuid}>')
 
-    def create_user(self, username, password, platform=None):
+    def __str__(self):
+        return (f'<PlatformUser {self.username}>')
+
+
+    @classmethod
+    def create_user(cls, username, password, return_token=False):
         """ creates new PlatformUser assumes validated in serializer """
         if not username or not password:
             raise ValueError('Missing username, password')
-        if platform is None:
-            platform = Platform.host_platform
 
-        user = PlatformUser(username=username, platform=platform)
+        platform = host_platform()
+        return_token = True if return_token else False
+
+        origin_username = username
+        username = f'{username}@{platform.name}'
+        user = cls(
+            username=username,
+            origin_username=origin_username, 
+            platform=platform)
         user.set_password(password)
         user.save()
-        Token.objects.create(user=user)
-        return user
+
+        utoken = Token.objects.create(user=user)
+        if return_token:
+            return (user, utoken)
+        return (user,)
 
 
 class Community(models.Model):
@@ -90,14 +119,19 @@ class Community(models.Model):
     community_type = models.CharField(
         max_length=50, choices=COMMUNITY_TYPES, default='SUB')
 
-    platform = models.OneToOneField(Platform, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, unique=True)
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
+    name = models.CharField(max_length=VALID_NAME_LEN_MAX)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return f'<Community {self.name} type={self.get_community_type.display()}>'
+        return (f'<Community {self.name} {self.uuid} ' \
+            f'type={self.get_community_type.display()} ' \
+            f'platform={self.platform}>')
+
+    def __str__(self):
+        return (f'<Community {self.name}@{self.platform}>')
 
 
 class CommunityPost(models.Model):
@@ -109,7 +143,7 @@ class CommunityPost(models.Model):
     text = models.TextField(blank=True, default='')
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)
-    platform = models.OneToOneField(Platform, on_delete=models.DO_NOTHING)
+    platform = models.ForeignKey(Platform, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -4,9 +4,7 @@ from typing import *
 from .models import (
     Platform, PlatformUser, Community, CommunityPost,
 )
-
-VALID_CHARS = string.ascii_letters + string.digits + '_' + '-'
-
+from fedrit.settings import VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
 
 def valid_uuid(string):
     regex = re.compile(
@@ -27,16 +25,16 @@ def valid_name(vstr: str, str_type: str) -> bool:
     str_type = str(str_type).lower()
     str_type_table = {
         'username': {
-            'maxlen': PlatformUser.origin_username.max_length,
-            'chars': VALID_CHARS,
+            'maxlen': VALID_NAME_LEN_MAX,
+            'chars': VALID_NAME_CHARS,
         },
         'communityname': {
-            'maxlen': Community.name.max_length,
-            'chars': VALID_CHARS,
+            'maxlen': VALID_NAME_LEN_MAX,
+            'chars': VALID_NAME_CHARS,
         },
         'platformname': {
-            'maxlen': Platform.name.max_length,
-            'chars': VALID_CHARS
+            'maxlen': VALID_NAME_LEN_MAX,
+            'chars': VALID_NAME_CHARS
         }
     }
 
