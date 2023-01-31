@@ -32,8 +32,8 @@ class Platform(models.Model):
     name = models.CharField(max_length=30, unique=True)
     domain = models.CharField(max_length=255, unique=True)
 
-    pgpkey = models.ForeignKey(
-        PGPKey, blank=True, null=True, on_delete=models.DO_NOTHING)
+    #pgpkey = models.ForeignKey(
+    #    PGPKey, blank=True, null=True, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -54,8 +54,8 @@ class PlatformUser(AbstractUser):
 
     username = models.CharField(max_length=30, unique=True)
 
-    pgpkey = models.ForeignKey(
-        PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
+    #pgpkey = models.ForeignKey(
+    #    PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

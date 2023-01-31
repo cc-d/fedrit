@@ -8,6 +8,11 @@ from .models import (
 VALID_CHARS = string.ascii_letters + string.digits + '_' + '-'
 
 
+def valid_uuid(string):
+    regex = re.compile(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$')
+    return bool(regex.match(string))
+
 def valid_name(vstr: str, str_type: str) -> bool:
     """Determines if a name str is valid for a provided str type, using
     str length and a character subset.
