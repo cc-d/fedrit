@@ -18,7 +18,7 @@ RUN apt-get install python3 python3-pip python3-venv git nodejs npm gnupg nginx 
 RUN apt-get install nginx -y
 
 ARG GITURL=https://github.com/cc-d/fedrit.git
-RUN git clone $GITURL # 12321123
+RUN git clone $GITURL # 5555
 
 WORKDIR fedrit/
 COPY nginx.conf /etc/nginx/nginx.conf
