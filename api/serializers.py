@@ -1,3 +1,4 @@
+import re
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ObjectDoesNotExist
@@ -22,7 +23,7 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ('uuid', 'platform_id', 'origin_username', 'username', 'password', 'token')
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'required': False},
             'platform_id': {'required': False},
             'uuid': {'required': False},
             'origin_username': {'required': False}
@@ -51,6 +52,20 @@ class PlatformUserSerializer(serializers.ModelSerializer):
 
         user = PlatformUser.create_user(
             username=username, password=password, return_token=return_token)
-        return user
+        return user 
 
-generate_ts('frontend/types.ts')
+
+def remove_serializer_suffix(typescript_types_str):
+    """ removes the ending of Serializer from types.ts str """
+    # Use regex to find the pattern "export interface {type_name}Serializer {"
+    pattern = r"export interface ([\w]+)Serializer\s*{"
+    # Replace the matching pattern with "export interface {type_name} {"
+    updated_types = re.sub(
+        pattern, r"export interface \1 {", typescript_types_str)
+    return updated_types
+
+
+TYPES_STRING = remove_serializer_suffix(get_ts(camelize=True))
+print('TYPES', TYPES_STRING)
+with open('frontend/src/types.ts', 'r+') as f:
+    f.write(TYPES_STRING)
