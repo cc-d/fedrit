@@ -20,7 +20,7 @@ class PlatformUserSerializer(serializers.ModelSerializer):
     token = serializers.CharField(allow_blank=True, read_only=True)
 
     class Meta:
-        model = get_user_model()
+        model = PlatformUser
         fields = ('uuid', 'platform_id', 'origin_username', 'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
@@ -31,7 +31,6 @@ class PlatformUserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user_obj = None
-        print('datata', data)
         username = data.get('username', None)
         password = data.get('password', None)
         data['platform_id'] = host_platform().uuid
