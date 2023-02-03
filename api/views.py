@@ -50,4 +50,4 @@ class AuthViewSet(viewsets.ModelViewSet):
         except IntegrityError as ie:
             return Response({'error':'user already exists'})
 
-        return Response({'user':str(user), 'token':utoken.key})
+        return Response({'user':PlatformUserSerializer(user).data, 'token':utoken.key})

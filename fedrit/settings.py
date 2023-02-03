@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 VALID_CHARS = string.ascii_letters + string.digits + '_' + '-'
 VALID_NAME_LEN_MAX = 30
 VALID_NAME_CHARS = string.ascii_letters + string.digits + '_' + '-'
+
+CORS_ORIGIN_ALLOW_ALL = True
 ##### End Custom Vars #####
 
 
@@ -62,7 +64,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
-    'api'
+    'api',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -73,6 +76,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
 
 ROOT_URLCONF = 'fedrit.urls'

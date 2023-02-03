@@ -30,7 +30,7 @@ class PGPKey(models.Model):
 
 
 class Platform(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     name = models.CharField(max_length=VALID_NAME_LEN_MAX)
     domain = models.CharField(max_length=255)
@@ -42,7 +42,7 @@ class Platform(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return f'<Platform {self.name} {self.uuid}>'
+        return f'<Platform {self.name} {self.id}>'
 
     def __str__(self):
         return f'<Platform {self.name}>'
@@ -63,7 +63,7 @@ def host_platform() -> Platform:
 
 
 class PlatformUser(AbstractUser):
-    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # original platform attributes
     platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
@@ -77,7 +77,7 @@ class PlatformUser(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return (f'<PlatformUser {self.username} {self.uuid}>')
+        return (f'<PlatformUser {self.username} {self.id}>')
 
     def __str__(self):
         return (f'<PlatformUser {self.username}>')
@@ -108,7 +108,7 @@ class PlatformUser(AbstractUser):
 
 
 class Community(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     COMMUNITY_TYPES = (
         ('SUB', 'Subreddit'),
@@ -126,7 +126,7 @@ class Community(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __repr__(self):
-        return (f'<Community {self.name} {self.uuid} ' \
+        return (f'<Community {self.name} {self.id} ' \
             f'type={self.get_community_type.display()} ' \
             f'platform={self.platform}>')
 
@@ -135,7 +135,7 @@ class Community(models.Model):
 
 
 class CommunityPost(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # post attributes
     author = models.OneToOneField(

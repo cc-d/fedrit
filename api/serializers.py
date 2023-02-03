@@ -20,12 +20,12 @@ class PlatformUserSerializer(serializers.ModelSerializer):
     token = serializers.CharField(allow_blank=True, read_only=True)
 
     class Meta:
-        model = PlatformUser
-        fields = ('uuid', 'platform_id', 'origin_username', 'username', 'password', 'token')
+        model = get_user_model()
+        fields = ('id', 'platform_id', 'origin_username', 'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'platform_id': {'required': False},
-            'uuid': {'required': False},
+            'id': {'required': False},
             'origin_username': {'required': False}
         }
 
@@ -33,7 +33,7 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         user_obj = None
         username = data.get('username', None)
         password = data.get('password', None)
-        data['platform_id'] = host_platform().uuid
+        data['platform_id'] = host_platform().id
 
         if not username or not password:
             raise serializers.ValidationError('missing username or password')
