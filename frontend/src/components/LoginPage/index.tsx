@@ -26,14 +26,20 @@ const LoginPage: React.FC = () => {
     try {
       let response;
       let formUser = action == 'login' ? logUser : regUser;
+      let fullUsername = action != 'register' ? 
+                      formUser.username + '@fedrit' : formUser.username
+
 
       response = await axios.post(`${API_URL}auth/${action}`, {
-        username: formUser.username,
+        username: fullUsername,
         password: formUser.password
-      });
-
-      setUser(response.data?.user)
-      console.log(`set ${user}`)
+      })
+      .then(response => {
+        localStorage.setItem('access_token', response.data.token)
+      })
+      .catch(err => {
+        setError(`failed ${action}`)
+      })
     } catch (err) {
       setError(`failed ${action}`);
     }
