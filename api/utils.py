@@ -6,35 +6,41 @@ from .models import (
 )
 from fedrit.settings import VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
 
+
 def valid_uuid(string):
     regex = re.compile(
         r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$')
     return bool(regex.match(string))
 
-def valid_name(vstr: str, str_type: str) -> bool:
+
+def valid_name(
+    vstr: str, str_type: str, add_chars: str = '') -> bool:
     """Determines if a name str is valid for a provided str type, using
     str length and a character subset.
 
     Args:
         vstr (str): string to validate
         str_type (str): type of string being validated
+        add_chars (str): any characters in this string will be added
+            to the valid character set.
 
     Returns:
         bool: is this str valid for this type
     """
+    valid_chars = VALID_NAME_CHARS + add_chars
     str_type = str(str_type).lower()
     str_type_table = {
         'username': {
             'maxlen': VALID_NAME_LEN_MAX,
-            'chars': VALID_NAME_CHARS,
+            'chars': valid_chars,
         },
         'communityname': {
             'maxlen': VALID_NAME_LEN_MAX,
-            'chars': VALID_NAME_CHARS,
+            'chars': valid_chars,
         },
         'platformname': {
             'maxlen': VALID_NAME_LEN_MAX,
-            'chars': VALID_NAME_CHARS
+            'chars': valid_chars
         }
     }
 
@@ -49,6 +55,19 @@ def valid_name(vstr: str, str_type: str) -> bool:
                 return False
         return True
     return False
+
+
+def valid_username(username: str) -> bool:
+    """Determines if a username is valid.
+
+    Args:
+        username (str): username to determine validity of
+
+    Returns:
+        bool: True if valid, False if invalid
+    """
+    reg = r'^[a-zA-Z0-9-_]{1,}?@?[a-zA-Z0-9-_]{1,}$'
+    return re.search(reg, username)
 
 
 def valid_url(url: str) -> bool:

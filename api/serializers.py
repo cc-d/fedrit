@@ -9,7 +9,9 @@ from rest_framework.authentication import TokenAuthentication
 from .models import (
     User, PlatformUser, Platform, host_platform
 )
-from .utils import valid_name, valid_url, valid_uuid
+from .utils import (
+    valid_name, valid_url, valid_uuid, valid_username
+)
 from fedrit.settings import HOST_PLATFORM
 
 import logging
@@ -37,7 +39,7 @@ class PlatformUserSerializer(serializers.ModelSerializer):
 
         if not username or not password:
             raise serializers.ValidationError('missing username or password')
-        elif not valid_name(username, 'username'):
+        elif not valid_username(username):
             raise serializers.ValidationError('invalid username')
         elif password is not None and len(str(password)) < 8:
             raise serializers.ValidationError('password too short')

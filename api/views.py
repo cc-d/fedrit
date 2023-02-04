@@ -1,3 +1,5 @@
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.shortcuts import render
@@ -19,7 +21,7 @@ class AuthViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = PlatformUserSerializer
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['POST'], detail=False)
     def login(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -34,12 +36,12 @@ class AuthViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['POST'], detail=False)
     def logout(self, request):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=['post'], detail=False)
+    @action(methods=['POST'], detail=False)
     def register(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -51,3 +53,14 @@ class AuthViewSet(viewsets.ModelViewSet):
             return Response({'error':'user already exists'})
 
         return Response({'user':PlatformUserSerializer(user).data, 'token':utoken.key})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_active_user(request):
+    """
+    Determine the current user by their token, and return their data
+    """
+
+    serializer = PlatformUserSerializer(request.user)
+    return Response(serializer.data)
