@@ -7,38 +7,29 @@ export const AuthContext = createContext({});
 const AuthProvider = (props: any) => {
   const [user, setUser] = useState(null);
   const [isLoading, setLoading] = useState(true);
+  const [token, setToken] = useState(null)
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get('/user');
+    const fetchUser = async(token: string) => {
+      const response = await axios.post(`${API_URL}/tokenuser`, {
+        'token': token,
+      }).then((response) => {
         setUser(response.data);
+      }).catch((err) => {
+        console.error(err);
+      }).finally(() => {
         setLoading(false);
-      } catch (err) {
-        setLoading(false);
-      }
+      });
     };
-    fetchUser();
+
+    let storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      fetchUser(storedToken);
+    }
   }, []);
 
-  const login = async (username: string, password: string) => {
-    try {
-      const response = await axios.post(`${API_URL}auth/login`, {
-        username,
-        password,
-      });
-      setUser(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading }}>
       {props.children}
     </AuthContext.Provider>
   );

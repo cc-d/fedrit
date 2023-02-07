@@ -10,6 +10,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 from .models import PlatformUser, Platform
 from .serializers import PlatformUserSerializer
 
@@ -23,14 +24,11 @@ class AuthViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def login(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
         user = authenticate(
-            username=validated_data['username'],
-            password=validated_data['password'])
+            username=request.data['username'],
+            password=request.data['password'])
         if user:
-            token = Token.objects.get_or_create(user=user)
+            token = Token.objects.get_or_create(user=user)[0]
             return Response({'token': token.key})
         else:
             return Response(
@@ -55,12 +53,12 @@ class AuthViewSet(viewsets.ModelViewSet):
         return Response({'user':PlatformUserSerializer(user).data, 'token':utoken.key})
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_active_user(request):
+class TokenUserView(APIView):
     """
     Determine the current user by their token, and return their data
     """
-
-    serializer = PlatformUserSerializer(request.user)
-    return Response(serializer.data)
+    def post(self, request):
+        token = request.data.get('token', None)
+        user = Token.objects.filter(key=token).first().user
+        serializer = PlatformUserSerializer(user)
+        return Response(serializer.data)

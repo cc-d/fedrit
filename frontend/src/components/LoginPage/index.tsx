@@ -30,12 +30,12 @@ const LoginPage: React.FC = () => {
                       formUser.username + '@fedrit' : formUser.username
 
 
-      response = await axios.post(`${API_URL}auth/${action}`, {
+      response = await axios.post(`${API_URL}/auth/${action}`, {
         username: fullUsername,
         password: formUser.password
       })
       .then(response => {
-        localStorage.setItem('access_token', response.data.token)
+        localStorage.setItem('token', response.data.token)
       })
       .catch(err => {
         setError(`failed ${action}`)
