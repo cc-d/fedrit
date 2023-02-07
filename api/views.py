@@ -19,8 +19,12 @@ logger = logging.getLogger(__name__)
 
 class AuthViewSet(viewsets.ModelViewSet):
     queryset = PlatformUser.objects.all()
-    permission_classes = (AllowAny,)
     serializer_class = PlatformUserSerializer
+
+    def get_permissions(self):
+        if self.action in ['login', 'register']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     @action(methods=['POST'], detail=False)
     def login(self, request):

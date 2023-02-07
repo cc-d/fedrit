@@ -1,61 +1,60 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import API_URL from '../../config';
+import { API_URL, BASE_URL } from '../../config';
 import { PlatformUser } from '../../types';
 
-interface LoginRegister {
+interface LoginFormInputs {
   username: string;
   password: string;
 }
 
 const LoginPage: React.FC = () => {
-  const [logUser, setLogUser] = useState<LoginRegister>({
-    username: '', password: '' 
-  });
-  const [regUser, setRegUser] = useState<LoginRegister>({
-    username: '', password: ''
-  });
-  const [user, setUser] = useState<PlatformUser>();
-  const [error, setError] = useState<string>('');
+  const [user, setUser] = useState<PlatformUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [logUser, setLogUser] = useState<LoginFormInputs>({
+    'username': '', 'password': '',
+  })
+  const [regUser, setRegUser] = useState<LoginFormInputs>({
+    'username': '', 'password': '',
+  })
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
     action: string
     ) => {
     event.preventDefault();
-    try {
-      let response;
-      let formUser = action == 'login' ? logUser : regUser;
-      let fullUsername = action != 'register' ? 
-                      formUser.username + '@fedrit' : formUser.username
 
+    let response;
+    let formUser = action == 'login' ? logUser : regUser;
+    let fullUsername = action != 'register' 
+      ? formUser.username + '@fedrit' : formUser.username
 
-      response = await axios.post(`${API_URL}/auth/${action}`, {
-        username: fullUsername,
-        password: formUser.password
-      })
-      .then(response => {
-        localStorage.setItem('token', response.data.token)
-      })
-      .catch(err => {
-        setError(`failed ${action}`)
-      })
-    } catch (err) {
-      setError(`failed ${action}`);
-    }
+    response = await axios.post(`${API_URL}/auth/${action}`, {
+      username: fullUsername,
+      password: formUser.password
+    }).then(response => {
+      // set token in localstorage and navigate to home
+      localStorage.setItem('token', response.data.token)
+      window.location.href = BASE_URL;
+    }).catch(err => {
+      setError(`failed ${action}`)
+    })
+
   };
 
   return (
     <div>
       <div>
-        <form onSubmit={e => handleSubmit(e, 'login')}>
+        <form id="form-login" onSubmit={e => handleSubmit(e, 'login')}>
           <input
+            id="input-login-username"
             type="text"
             placeholder="Username"
             value={logUser.username}
             onChange={e => setLogUser({ ...logUser, username: e.target.value })}
           />
           <input
+            id="input-login-password"
             type="password"
             placeholder="Password"
             value={logUser.password}
@@ -66,14 +65,16 @@ const LoginPage: React.FC = () => {
         {error && <p>{error}</p>}
       </div>
       <div>
-        <form onSubmit={e => handleSubmit(e, 'register')}>
+        <form id="form-register" autoComplete="off" onSubmit={e => handleSubmit(e, 'register')}>
           <input
+            id="input-register-username"
             type="text"
             placeholder="Username"
             value={regUser.username}
             onChange={e => setRegUser({ ...regUser, username: e.target.value })}
           />
           <input
+            id="input-register-password"
             type="password"
             placeholder="Password"
             value={regUser.password}
