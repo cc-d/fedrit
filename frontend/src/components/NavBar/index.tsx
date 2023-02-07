@@ -1,21 +1,12 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PlatformUser } from '../../types';
+import { AuthContext, AuthContextProps } from '../../AuthProvider';
 
 const NavBar: React.FC = () => {
-  const [user, setUser] = useState<PlatformUser | null>(null);
+  const { user, isLoading }: any = useContext(AuthContext);
 
-  useEffect(() => {
-    // Make API request to /user here
-    axios.get('/user')
-      .then(response => {
-        setUser(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
   return (
     <nav>
       <ul>
@@ -29,6 +20,9 @@ const NavBar: React.FC = () => {
           <Link to='/login'>Login</Link>
         </li>
       </ul>
+      <h1>
+        User: { user?.username }
+      </h1>
     </nav>
   );
 };
