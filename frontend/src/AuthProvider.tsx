@@ -13,37 +13,42 @@ export interface AuthContextProps {
 const AuthProvider = (props: any) => {
   const [user, setUser] = useState<PlatformUser | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [getUser, setGetUser] = useState<boolean | null>(null);
+  //const [token, setToken] = useState<string | null | boolean>(false);
+  const token = localStorage.getItem('token');
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('token');
-    window.location.reload();
+
+  const fetchUser =  async(token: string) => {
+    const response =  await axios.post(`${API_URL}/tokenuser`, {
+      'token': token,
+    }).then((response) => {
+      console.log('then fetchuser');
+      setUser(response.data);
+    }).catch((err) => {
+      console.error(err);
+    }).finally(() => {
+      console.log('finalyl fetchuser');
+    });
   };
 
+  console.log('outside useffect');
+
   useEffect(() => {
-    const fetchUser = async(token: string) => {
-      setLoading(true);
-      const response = await axios.post(`${API_URL}/tokenuser`, {
-        'token': token,
-      }).then((response) => {
-        console.log('useeffect');
-        setUser(response.data);
-      }).catch((err) => {
-        console.error(err);
-      }).finally(() => {
-        setLoading(false);
-        console.log('FINALLY');
-      });
-    };
-
-    let storedToken = localStorage.getItem('token');
-    if (storedToken && user === null && !isLoading) { 
-      fetchUser(storedToken);
+    console.log(`inside useffect setloading ${isLoading} ${token} ${user}`);
+    if (token && getUser === null) {
+      setGetUser(true);
+    } else if (token && getUser === true) {
+      setGetUser(false);
+      setLoading(true)
+      console.log('storedtoken and user calling fetchuser');
+      fetchUser(token).then(() => setLoading(false));
     }
-  }, [user]);
+  }, [getUser]);
 
+  console.log('before return');
+  
   return (
-    <AuthContext.Provider value={{ setUser, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading }}>
       {props.children}
     </AuthContext.Provider>
   );

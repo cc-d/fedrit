@@ -20,6 +20,8 @@ const NavBar: React.FC = () => {
     });
   };
 
+  console.log('navbar');
+
   return (
     <nav>
       <ul>
