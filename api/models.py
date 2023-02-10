@@ -53,7 +53,6 @@ def host_platform() -> Platform:
         .filter(name=HOST_PLATFORM['name']) \
         .filter(domain=HOST_PLATFORM['domain']) \
         .first()
-    print('hothost',host)
 
     if not host:
         host = Platform.objects.create(
@@ -117,9 +116,10 @@ class Community(models.Model):
     )
 
     community_type = models.CharField(
-        max_length=50, choices=COMMUNITY_TYPES, default='SUB')
+        max_length=20, choices=COMMUNITY_TYPES, default='SUB')
 
-    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
+    platform = models.ForeignKey(
+        Platform, default=host_platform(), on_delete=models.CASCADE)
     name = models.CharField(max_length=VALID_NAME_LEN_MAX)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -143,7 +143,8 @@ class CommunityPost(models.Model):
     text = models.TextField(blank=True, default='')
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)
-    platform = models.ForeignKey(Platform, on_delete=models.DO_NOTHING)
+    platform = models.ForeignKey(
+        Platform, default=host_platform(), on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

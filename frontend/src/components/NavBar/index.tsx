@@ -20,8 +20,6 @@ const NavBar: React.FC = () => {
     });
   };
 
-  console.log('navbar');
-
   return (
     <nav>
       <ul>
@@ -31,13 +29,20 @@ const NavBar: React.FC = () => {
         <li>
           <Link to='/about'>About</Link>
         </li>
-        <li>
-          <Link to='/login'>Login</Link>
-        </li>
-        {user && (
+        {!user && (
           <li>
-            <Link to='/logout' onClick={handleLogout}>Logout</Link>
+            <Link to='/login'>Login</Link>
           </li>
+        )}
+        {user && (
+          <>
+            <li>
+              <Link to='/logout' onClick={handleLogout}>Logout</Link>
+            </li>
+            <li>
+              <Link to='/create'>Create Community</Link>
+            </li>
+          </>
         )}
       </ul>
       <h1>

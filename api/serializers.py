@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
-    User, PlatformUser, Platform, host_platform
+    User, PlatformUser, Platform, host_platform, Community
 )
 from .utils import (
     valid_name, valid_url, valid_uuid, valid_username
@@ -54,6 +54,8 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         user = PlatformUser.create_user(
             username=username, password=password, return_token=return_token)
         return user 
+
+
 
 
 def remove_serializer_suffix(typescript_types_str):
