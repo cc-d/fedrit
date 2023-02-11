@@ -1,4 +1,6 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
+from api.serializers import CommunitySerializer
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django_typomatic import ts_interface, get_ts, generate_ts
@@ -8,23 +10,30 @@ from rest_framework import views, status, viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import (
+    AllowAny, IsAdminUser, IsAuthenticated, 
+)
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .models import PlatformUser, Platform
-from .serializers import PlatformUserSerializer
+from .models import (
+    PlatformUser, Platform, Community, host_platform
+)
+from .serializers import (
+    PlatformUserSerializer, CommunitySerializer
+)
 
 import logging
 logger = logging.getLogger(__name__)
 
 class AuthViewSet(viewsets.ModelViewSet):
     queryset = PlatformUser.objects.all()
+    authentication_classes = [TokenAuthentication]
     serializer_class = PlatformUserSerializer
 
     def get_permissions(self):
-        if self.action in ['login', 'register']:
-            return [AllowAny()]
-        return [IsAuthenticated()]
+        if self.action in ['logout']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     @action(methods=['POST'], detail=False)
     def login(self, request):
@@ -70,3 +79,24 @@ class TokenUserView(APIView):
             serializer = PlatformUserSerializer(user)
             return Response(serializer.data)
         return Response({'error':'no token found'})
+
+
+class CommunityViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = CommunitySerializer
+    queryset = Community.objects.all()
+
+    @action(methods=['POST'], detail=False)
+    def create_community(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        community = serializer.save()
+        return Response(CommunitySerializer(community).data)
+
+    @action(methods=['GET'], detail=False)
+    def all(self, request):
+        comms = list(Community.objects \
+            .filter(platform=host_platform()) \
+            .all())
+        return Response([CommunitySerializer(c).data for c in comms])

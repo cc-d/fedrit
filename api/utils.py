@@ -13,14 +13,12 @@ def valid_uuid(string):
     return bool(regex.match(string))
 
 
-def valid_name(
-    vstr: str, str_type: str, add_chars: str = '') -> bool:
+def valid_name(vstr: str, add_chars: str = '') -> bool:
     """Determines if a name str is valid for a provided str type, using
     str length and a character subset.
 
     Args:
         vstr (str): string to validate
-        str_type (str): type of string being validated
         add_chars (str): any characters in this string will be added
             to the valid character set.
 
@@ -28,27 +26,8 @@ def valid_name(
         bool: is this str valid for this type
     """
     valid_chars = VALID_NAME_CHARS + add_chars
-    str_type = str(str_type).lower()
-    str_type_table = {
-        'username': {
-            'maxlen': VALID_NAME_LEN_MAX,
-            'chars': valid_chars,
-        },
-        'communityname': {
-            'maxlen': VALID_NAME_LEN_MAX,
-            'chars': valid_chars,
-        },
-        'platformname': {
-            'maxlen': VALID_NAME_LEN_MAX,
-            'chars': valid_chars
-        }
-    }
 
-    if str_type not in str_type_table:
-        str_type = 'username'
-
-    if len(vstr) > 0 and \
-        len(vstr) <= str_type_table[str_type]['maxlen']:
+    if len(vstr) > 0 and len(vstr) <= VALID_NAME_LEN_MAX:
         unique_chars = ''.join(list(set(vstr)))
         for uc in unique_chars:
             if uc not in VALID_CHARS:

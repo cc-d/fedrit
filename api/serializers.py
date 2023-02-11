@@ -3,7 +3,8 @@ from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from rest_framework import serializers
+from rest_framework.serializers import (
+    ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
@@ -19,27 +20,29 @@ logger = logging.getLogger(__name__)
 
 
 @ts_interface()
-class PlatformSerializer(serializers.ModelSerializer):
+class PlatformSerializer(ModelSerializer):
     class Meta:
         model = Platform
         fields = '__all__'
 
 
 @ts_interface()
-class PlatformUserSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(allow_blank=True, read_only=True)
+class PlatformUserSerializer(ModelSerializer):
+    token = CharField(allow_blank=True, read_only=True)
     platform = PlatformSerializer(read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = (
-            'id', 'platform', 'origin_username', 
+            'id', 'platform', 'origin_username', 'created_at', 'updated_at',
             'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'platform': {'read_only': True},
             'id': {'required': False},
-            'origin_username': {'required': False}
+            'origin_username': {'required': False},
+
+            'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
         }
 
     def validate(self, data):
@@ -49,11 +52,11 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         data['platform'] = host_platform()
 
         if not username or not password:
-            raise serializers.ValidationError('missing username or password')
+            raise ValidationError('missing username or password')
         elif not valid_username(username):
-            raise serializers.ValidationError('invalid username')
+            raise ValidationError('invalid username')
         elif password is not None and len(str(password)) < 8:
-            raise serializers.ValidationError('password too short')
+            raise ValidationError('password too short')
 
         return data
 
@@ -65,6 +68,54 @@ class PlatformUserSerializer(serializers.ModelSerializer):
         user = PlatformUser.create_user(
             username=username, password=password, return_token=return_token)
         return user 
+
+
+@ts_interface()
+class CommunitySerializer(ModelSerializer):
+    class Meta:
+        model = Community
+        fields = ('id', 'community_type', 'platform',
+                  'name', 'created_at', 'updated_at')
+        extra_kwargs = {
+            'id': {'required': False},
+            'community_type': {'required': False},
+            'platform': {'required': False, 'read_only': True},
+            'name': {'required': False},
+            'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
+        }
+
+    def validate(self, data):
+        name = data.get('name', None)
+        ctype = data.get('community_type', None)
+        data['platform'] = host_platform()
+
+        if not name or not valid_name(name):
+            raise ValidationError('missing or invalid username')
+
+        if ctype:
+            ctype = str(ctype).upper()
+            print('comtypes', [x[0] for x in Community.COMMUNITY_TYPES])
+            if ctype not in [x[0] for x in Community.COMMUNITY_TYPES]:
+                raise ValidationError('invalid community type')
+            data['community_type'] = ctype
+        else:
+            raise ValidationError('invalid community type')
+
+        return data
+
+    def create(self, validated_data):
+        name = validated_data['name']
+        comtype = validated_data['community_type']
+
+        newcom = Community.objects.create(
+            name=name, community_type=comtype)
+        return newcom
+
+
+
+
+
+
 
 
 LOCALS = dict(locals().items())

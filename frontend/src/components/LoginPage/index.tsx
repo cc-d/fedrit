@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { API_URL, BASE_URL } from '../../config';
 import { PlatformUser } from '../../types';
+import { useNavigate } from 'react-router';
 
 interface LoginFormInputs {
   username: string;
@@ -17,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [regUser, setRegUser] = useState<LoginFormInputs>({
     'username': '', 'password': '',
   })
+  const navigate = useNavigate();
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -35,7 +37,7 @@ const LoginPage: React.FC = () => {
     }).then(response => {
       // set token in localstorage and navigate to home
       localStorage.setItem('token', response.data.token)
-      window.location.href = BASE_URL;
+      window.location.href = '/'
     }).catch(err => {
       setError(`failed ${action}`)
     })

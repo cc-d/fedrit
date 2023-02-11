@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import routers
 
+
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'auth', api.views.AuthViewSet)
+router.register(r'community', api.views.CommunityViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    re_path('^api/tokenuser$', api.views.TokenUserView.as_view())
+    re_path(r'^api/tokenuser$', api.views.TokenUserView.as_view()),
 ]

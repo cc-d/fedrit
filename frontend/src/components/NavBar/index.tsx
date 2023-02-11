@@ -1,20 +1,21 @@
 import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PlatformUser } from '../../types';
 import { AuthContext, AuthContextProps } from '../../AuthProvider';
 import { API_URL, BASE_URL } from '../../config';
 import authAxios from '../../utils';
 
 const NavBar: React.FC = () => {
+  const navigate = useNavigate();
   const { user, isLoading, setUser }: any = useContext(AuthContext);
 
   const handleLogout = async () => {
-    await authAxios.get(`${API_URL}/auth/logout`)
+    await authAxios.post(`${API_URL}/auth/logout`)
     .then((resp) => {
       setUser(null);
       localStorage.removeItem('token');
-      window.location.reload();
+      window.location.href = '/'
     }).catch((err) => {
       console.error(err);
     });
@@ -40,7 +41,7 @@ const NavBar: React.FC = () => {
               <Link to='/logout' onClick={handleLogout}>Logout</Link>
             </li>
             <li>
-              <Link to='/create'>Create Community</Link>
+              <Link to='/communities'>Communities</Link>
             </li>
           </>
         )}
