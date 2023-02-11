@@ -119,7 +119,7 @@ class Community(models.Model):
         max_length=20, choices=COMMUNITY_TYPES, default='SUB')
 
     platform = models.ForeignKey(
-        Platform, default=host_platform(), on_delete=models.CASCADE)
+        Platform, default=host_platform, on_delete=models.CASCADE)
     name = models.CharField(max_length=VALID_NAME_LEN_MAX)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -144,7 +144,7 @@ class CommunityPost(models.Model):
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)
     platform = models.ForeignKey(
-        Platform, default=host_platform(), on_delete=models.DO_NOTHING)
+        Platform, default=host_platform, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

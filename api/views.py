@@ -63,7 +63,10 @@ class TokenUserView(APIView):
     """
     def post(self, request):
         token = request.data.get('token', None)
-        user = Token.objects.filter(key=token).first().user
-        user.token = token
-        serializer = PlatformUserSerializer(user)
-        return Response(serializer.data)
+        token = Token.objects.filter(key=token).first()
+        if token:
+            user = token.user
+            user.token = token
+            serializer = PlatformUserSerializer(user)
+            return Response(serializer.data)
+        return Response({'error':'no token found'})
