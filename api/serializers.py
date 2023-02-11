@@ -3,21 +3,22 @@ from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from django.db.models import Q
 from rest_framework.serializers import (
     ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
-    User, PlatformUser, Platform, host_platform, Community
+    User, PlatformUser, Platform, host_platform, Community, Post
 )
 from .utils import (
-    valid_name, valid_url, valid_uuid, valid_username
+    valid_name, valid_url, valid_uuid, valid_username,
+    def_kwargs, modchoice
 )
 from fedrit.settings import HOST_PLATFORM
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 @ts_interface()
 class PlatformSerializer(ModelSerializer):
@@ -81,25 +82,43 @@ class CommunitySerializer(ModelSerializer):
             'community_type': {'required': False},
             'platform': {'required': False, 'read_only': True},
             'name': {'required': False},
-            'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
+            'created_at': {'read_only': True, 'required': False}, 
+            'updated_at': {'read_only': True, 'required': False},
         }
 
     def validate(self, data):
-        name = data.get('name', None)
+        cname = data.get('name', None)
         ctype = data.get('community_type', None)
+        cid = data.get('id', None)
+
         data['platform'] = host_platform()
 
-        if not name or not valid_name(name):
-            raise ValidationError('missing or invalid username')
+        if cid:
+            try:
+                comm = Community.objects.get(pk=cid)
+                return comm
+            except ObjectDoesNotExist as e:
+                raise ValidationError('community id does not exist')
+        elif cname:
+            if not valid_name(cname):
+                raise ValidationError('missing or invalid username')
 
-        if ctype:
-            ctype = str(ctype).upper()
-            print('comtypes', [x[0] for x in Community.COMMUNITY_TYPES])
-            if ctype not in [x[0] for x in Community.COMMUNITY_TYPES]:
-                raise ValidationError('invalid community type')
-            data['community_type'] = ctype
-        else:
-            raise ValidationError('invalid community type')
+            comm = Community.objects.filter(name=cname).first()
+            if comm: return comm
+
+            if ctype:
+                ctype = str(ctype).upper()
+                if ctype not in [x[0] for x in Community.COMMUNITY_TYPES]:
+                    raise ValidationError('invalid community type')
+
+                comm = Community.objects.filter(
+                    community_type=ctype, name=cname).first()
+                if comm: return comm
+
+                data['community_type'] = ctype
+            else: raise ValidationError('invalid community type')
+        else: raise ValidationError('commid or name required')
+
 
         return data
 
@@ -113,9 +132,34 @@ class CommunitySerializer(ModelSerializer):
 
 
 
+@ts_interface()
+class PostSerializer(ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
 
+    def validate(self, data):
+        title = data.get('title', None)
+        text = data.get('text', '')
+        cname = data.get('community_name', None)
+        cid = data.get('community_id', None)
 
+        if len(title) > 255:
+            raise ValidationError('title has 2 b shorter than 255')
+        elif cname is None and cid is None:
+            raise ValidationError('must have com id or name')
+        
+        if cname:
+            comm = Community.objects.filter(name__iexact=cname).first()
+            if comm is None: raise ValidationError('badname')
+        elif cid:
+            try:
+                comm = Community.objects.get(pk=cid)
+            except ObjectDoesNotExist as e:
+                raise ValidationError('id doesnt exist')
 
+        data['community'] = comm
+        return data
 
 
 LOCALS = dict(locals().items())

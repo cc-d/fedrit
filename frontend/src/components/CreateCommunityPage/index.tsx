@@ -34,7 +34,7 @@ const CreateCommunityPage: React.FC = () => {
     try {
       const response = await authAxios.post(
         `${BASE_URL}/api/community/create_community`, formData);
-      navigate('/communities');
+      navigate('/community/all');
     } catch (err) {
       console.error(err);
     }

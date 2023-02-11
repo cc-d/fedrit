@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=api.models.host_platform, on_delete=django.db.models.deletion.CASCADE, to='api.platform'),
         ),
         migrations.AlterField(
-            model_name='communitypost',
+            model_name='Post',
             name='platform',
             field=models.ForeignKey(default=api.models.host_platform, on_delete=django.db.models.deletion.DO_NOTHING, to='api.platform'),
         ),

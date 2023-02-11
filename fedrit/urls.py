@@ -22,9 +22,13 @@ from rest_framework import routers
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'auth', api.views.AuthViewSet)
 router.register(r'community', api.views.CommunityViewSet)
+router.register(r'post', api.views.PostViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     re_path(r'^api/tokenuser$', api.views.TokenUserView.as_view()),
+    re_path(
+        r'^c/(?P<community_name>[\w-]+)/$',
+        api.views.CommunityViewSet.as_view({'get': 'posts'})),
 ]

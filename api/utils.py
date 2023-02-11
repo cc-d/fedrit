@@ -2,7 +2,7 @@ import re
 import string
 from typing import *
 from .models import (
-    Platform, PlatformUser, Community, CommunityPost,
+    Platform, PlatformUser, Community, Post,
 )
 from fedrit.settings import VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
 
@@ -67,3 +67,19 @@ def valid_url(url: str) -> bool:
         r'(?::\d+)?'  # optional port
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
     return re.match(regex, url) is not None
+
+
+def def_kwargs(*args, **kwargs) -> dict:
+    dk = dict(kwargs)
+    dk['id'] = {'required': False}
+    dk['created_at'] = {'read_only': True},
+    dk['updated_at'] = {'read_only': True}
+    print('dk', dk)
+    return dk
+
+def modchoice(t: str, choice: tuple):
+    t = str(t).upper()
+    for c in choice:
+        if c[0] == t:
+            return c[1]
+

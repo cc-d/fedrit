@@ -4,13 +4,13 @@ import {
     BrowserRouter, Routes, Route, Link
 } from 'react-router-dom';
 import authAxios from '../../utils';
-import { API_URL } from '../../config';
+import { API_URL, BASE_URL } from '../../config';
 import { AuthContext, AuthContextProps } from '../../AuthProvider';
 
 const CommunitiesPage: React.FC = () => {
     const { user, setUser, getUser }: any = useContext(AuthContext);
     const [communities, setCommunities] = useState<Array<Community>>([])
-    const [loading, setLoading] = useState<boolean | null>(null);
+    const [getData, setGetData] = useState<boolean | null>(null);
 
     const fetchCommunities = async() => {
         try {
@@ -23,20 +23,27 @@ const CommunitiesPage: React.FC = () => {
 
     useEffect(() => {
         console.log(communities);
-        if (loading === null) {
-            setLoading(true);
-        } else if (loading === true) {
-            fetchCommunities().then(() => setLoading(false));
+        if (getData === null) {
+            setGetData(true);
+        } else if (getData === true) {
+            fetchCommunities().then(() => setGetData(false));
         }
-    }, [communities, loading])
+    }, [communities, getData])
 
-    const commItems = communities.map((comm) => {
-        return <div key={comm.id}>{comm.id}</div>
+    const commItems = communities.map((comm: Community) => {
+        return (
+            <div style={{display: 'block'}}>
+                <Link key={comm.id} to={`/c/${comm.name}`} style={{}}>
+                    <p style={{ display: 'inline-block', marginRight: 4 }}>{comm.id}</p>
+                    <p style={{ display: 'inline-block', fontWeight: 600 }}>{comm.name}</p>
+                </Link>
+            </div>
+        )
     });
 
     return (
         <>
-            <Link to='/communities/new'>Create Community</Link>
+            <Link to='/community/new'>Create Community</Link>
             {commItems}
         </>
     )

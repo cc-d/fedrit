@@ -133,13 +133,18 @@ class Community(models.Model):
     def __str__(self):
         return (f'<Community {self.name}@{self.platform}>')
 
+    @property
+    def ctype(self):
+        return self.community_type
 
-class CommunityPost(models.Model):
+
+class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     # post attributes
-    author = models.OneToOneField(
+    author = models.ForeignKey(
         PlatformUser, blank=True, null=True, on_delete=models.DO_NOTHING)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE)
     text = models.TextField(blank=True, default='')
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)

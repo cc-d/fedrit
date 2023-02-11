@@ -16,10 +16,10 @@ from rest_framework.permissions import (
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from .models import (
-    PlatformUser, Platform, Community, host_platform
+    PlatformUser, Platform, Community, host_platform, Post,
 )
 from .serializers import (
-    PlatformUserSerializer, CommunitySerializer
+    PlatformUserSerializer, CommunitySerializer, PostSerializer
 )
 
 import logging
@@ -100,3 +100,32 @@ class CommunityViewSet(viewsets.ModelViewSet):
             .filter(platform=host_platform()) \
             .all())
         return Response([CommunitySerializer(c).data for c in comms])
+
+    @action(methods=['GET'], detail=False)
+    def posts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        vdata = serializer.validated_data
+
+        cposts = list(
+            Post.objects.filter(community_id=vdata['id']).all())
+        return Response([PostSerializer(p) for p in cposts])
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = PostSerializer
+
+    @action(methods=['POST'], detail=False)
+    def create_post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        vdata = serializer.validated_data
+        author = request.user
+
+        newpost = Post(
+            title=vdata['title'], text=vdata['text'],
+            platform=host_platform(), community=vdata['community'],
+            author=author)

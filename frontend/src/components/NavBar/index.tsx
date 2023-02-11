@@ -8,7 +8,7 @@ import authAxios from '../../utils';
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isLoading, setUser }: any = useContext(AuthContext);
+  const { user, setUser }: any = useContext(AuthContext);
 
   const handleLogout = async () => {
     await authAxios.post(`${API_URL}/auth/logout`)
@@ -41,7 +41,7 @@ const NavBar: React.FC = () => {
               <Link to='/logout' onClick={handleLogout}>Logout</Link>
             </li>
             <li>
-              <Link to='/communities'>Communities</Link>
+              <Link to='/community/all'>Communities</Link>
             </li>
           </>
         )}

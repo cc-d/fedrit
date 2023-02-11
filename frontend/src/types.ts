@@ -26,3 +26,15 @@ export interface Community {
     updatedAt?: string;
 }
 
+export interface Post {
+    id?: string;
+    text?: string;
+    url?: string;
+    title: string;
+    createdAt?: string;
+    updatedAt?: string;
+    author?: number | string | null;
+    community: number | string;
+    platform?: number | string;
+}
+
