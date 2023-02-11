@@ -73,25 +73,29 @@ class PlatformUserSerializer(ModelSerializer):
 
 @ts_interface()
 class CommunitySerializer(ModelSerializer):
+    platform = PlatformSerializer
+
     class Meta:
         model = Community
-        fields = ('id', 'community_type', 'platform',
-                  'name', 'created_at', 'updated_at')
+        fields = '__all__'
+
         extra_kwargs = {
             'id': {'required': False},
             'community_type': {'required': False},
-            'platform': {'required': False, 'read_only': True},
-            'name': {'required': False},
+            'name': {'required':False},
             'created_at': {'read_only': True, 'required': False}, 
             'updated_at': {'read_only': True, 'required': False},
         }
 
     def validate(self, data):
-        cname = data.get('name', None)
+        print('data',data,'context',self.context)
+        cname = self.context.get('community_name', None)
+        cid = self.context.get('community_id', None)
         ctype = data.get('community_type', None)
-        cid = data.get('id', None)
-
         data['platform'] = host_platform()
+        data['name'] = cname
+
+        print('vvvv', self.context, data)
 
         if cid:
             try:
@@ -102,7 +106,6 @@ class CommunitySerializer(ModelSerializer):
         elif cname:
             if not valid_name(cname):
                 raise ValidationError('missing or invalid username')
-
             comm = Community.objects.filter(name=cname).first()
             if comm: return comm
 
@@ -114,10 +117,10 @@ class CommunitySerializer(ModelSerializer):
                 comm = Community.objects.filter(
                     community_type=ctype, name=cname).first()
                 if comm: return comm
-
-                data['community_type'] = ctype
-            else: raise ValidationError('invalid community type')
-        else: raise ValidationError('commid or name required')
+            else: 
+                raise ValidationError('invalid community type')
+        else: 
+            raise ValidationError('commid or name required')
 
 
         return data
@@ -134,31 +137,48 @@ class CommunitySerializer(ModelSerializer):
 
 @ts_interface()
 class PostSerializer(ModelSerializer):
+    author = PlatformUserSerializer
+    community = CommunitySerializer
+    platform = PlatformSerializer
+
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('id', 'author', 'community', 'platform', 'url',
+                  'title', 'text', 'created_at', 'updated_at')
+
+        extra_kwargs = {
+            'id': {'required': False},
+            'platform': {'required': False, 'read_only': True},
+            'author': {'required': False},
+            'community': {'required': False},
+            'community_id': {'write_only': True, 'required': False},
+            'community_name': {'write_only': True, 'required': False},
+            'text': {'required': False},
+            'url': {'required': False},
+            'created_at': {'read_only': True, 'required': False},
+            'updated_at': {'read_only': True, 'required': False},
+        }
 
     def validate(self, data):
+        author = data.get('author')
         title = data.get('title', None)
         text = data.get('text', '')
-        cname = data.get('community_name', None)
-        cid = data.get('community_id', None)
+        cname = self.context.get('community_name', None)
+        cid = self.context.get('community_id', None)
+        print('reqcontext', data, self.context)
 
         if len(title) > 255:
             raise ValidationError('title has 2 b shorter than 255')
-        elif cname is None and cid is None:
+            
+        if cname is None and cid is None:
             raise ValidationError('must have com id or name')
-        
-        if cname:
-            comm = Community.objects.filter(name__iexact=cname).first()
-            if comm is None: raise ValidationError('badname')
-        elif cid:
-            try:
-                comm = Community.objects.get(pk=cid)
-            except ObjectDoesNotExist as e:
-                raise ValidationError('id doesnt exist')
+        else:
+            if cid:
+                data['community'] = Community.objects.get(pk=cid)
+            elif cname:
+                data['community'] = Community.objects.filter(
+                    name__iexact=cname).first()
 
-        data['community'] = comm
         return data
 
 

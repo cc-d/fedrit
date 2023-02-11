@@ -29,6 +29,6 @@ urlpatterns = [
     path('api/', include(router.urls)),
     re_path(r'^api/tokenuser$', api.views.TokenUserView.as_view()),
     re_path(
-        r'^c/(?P<community_name>[\w-]+)/$',
+        r'^api/community/(?P<community_name>[a-zA-Z0-9]+)/posts$',
         api.views.CommunityViewSet.as_view({'get': 'posts'})),
 ]

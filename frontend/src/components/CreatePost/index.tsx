@@ -18,9 +18,9 @@ const CreatePost: react.FC = (() => {
     ) => {
         event.preventDefault();
         try {
-            const response = await authAxios.post(`${API_URL}/post/create`, {
-                communityId: communityId,
-                communityName: communityName,
+            const response = await authAxios.post(`${API_URL}/post/create_post`, {
+                community_id: communityId,
+                community_name: communityName,
                 title: title,
                 text: text,
             });
@@ -47,6 +47,7 @@ const CreatePost: react.FC = (() => {
             value={text}
             onChange={e => setText(e.target.value)}
         />
+        <button type="submit">Create Post</button>
       </form>
     </>
   )

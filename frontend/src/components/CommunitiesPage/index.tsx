@@ -32,7 +32,7 @@ const CommunitiesPage: React.FC = () => {
 
     const commItems = communities.map((comm: Community) => {
         return (
-            <div style={{display: 'block'}}>
+            <div key={comm.id} style={{display: 'block'}}>
                 <Link key={comm.id} to={`/c/${comm.name}`} style={{}}>
                     <p style={{ display: 'inline-block', marginRight: 4 }}>{comm.id}</p>
                     <p style={{ display: 'inline-block', fontWeight: 600 }}>{comm.name}</p>

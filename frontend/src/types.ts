@@ -20,21 +20,21 @@ export interface PlatformUser {
 export interface Community {
     id?: string;
     communityType?: "SUB" | "IMGBOARD" | "FORUM";
-    platform?: number | string;
     name?: string;
     createdAt?: string;
     updatedAt?: string;
+    platform?: number | string;
 }
 
 export interface Post {
     id?: string;
-    text?: string;
+    author?: number | string | null;
+    community?: number | string;
+    platform?: number | string;
     url?: string;
     title: string;
+    text?: string;
     createdAt?: string;
     updatedAt?: string;
-    author?: number | string | null;
-    community: number | string;
-    platform?: number | string;
 }
 

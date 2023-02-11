@@ -1,5 +1,7 @@
 from rest_framework import generics
+from json import loads, dumps
 from api.serializers import CommunitySerializer
+from copy import deepcopy
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login, logout
@@ -103,13 +105,18 @@ class CommunityViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def posts(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        if 'name' in kwargs:
+            kwargs['comm']
+        print('postargskargs', args, kwargs)
+        serializer = self.get_serializer(data=request.data, context=kwargs)
+        print('afterser', serializer)
         serializer.is_valid(raise_exception=True)
+        print('isvalid', serializer)
         vdata = serializer.validated_data
+        print('vdata',vdata)
 
-        cposts = list(
-            Post.objects.filter(community_id=vdata['id']).all())
-        return Response([PostSerializer(p) for p in cposts])
+        cposts = Post.objects.filter(community__id=vdata.id).all() or []
+        return Response([PostSerializer(p).data for p in cposts])
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -119,13 +126,21 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     @action(methods=['POST'], detail=False)
-    def create_post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def create_post(self, request):
+        context = {
+            'community_id': request.data.get('community_id', None),
+            'community_name': request.data.get('community_name', None),
+            'author': request.user,
+            'platform': host_platform()
+        }
+
+        serializer = self.get_serializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
         vdata = serializer.validated_data
         author = request.user
 
-        newpost = Post(
+        newpost = Post.objects.create(
             title=vdata['title'], text=vdata['text'],
             platform=host_platform(), community=vdata['community'],
             author=author)
+        return Response(PostSerializer(newpost).data)

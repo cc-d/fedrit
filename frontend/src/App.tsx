@@ -29,7 +29,7 @@ function App() {
           <Route path='/community/all' element={<CommunitiesPage />} />
           <Route path='/community/new' element={<CreateCommunityPage />} />
           <Route path='/c/:communityName/:communityId?' element={<Community />} />
-          <Route path='/c/:communityName/:communityId:/create_post' element={<CreatePost />} />
+          <Route path='/c/:communityName/:communityId?/create_post' element={<CreatePost />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
