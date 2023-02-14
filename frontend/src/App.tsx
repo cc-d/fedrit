@@ -15,6 +15,7 @@ import HomePage from './components/HomePage';
 import NavBar from './components/NavBar';
 import Community from './components/Community';
 import CreatePost from './components/CreatePost';
+import PostComments from './components/Post';
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path='/community/new' element={<CreateCommunityPage />} />
           <Route path='/c/:communityName/:communityId?' element={<Community />} />
           <Route path='/c/:communityName/:communityId?/create_post' element={<CreatePost />} />
+          <Route path='/c/:communityName/:communityId?/p/:postId' element={<PostComments />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -144,12 +144,27 @@ class Post(models.Model):
     # post attributes
     author = models.ForeignKey(
         PlatformUser, blank=True, null=True, on_delete=models.DO_NOTHING)
-    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, on_delete=models.DO_NOTHING)
     text = models.TextField(blank=True, default='')
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)
     platform = models.ForeignKey(
         Platform, default=host_platform, on_delete=models.DO_NOTHING)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Comment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+
+    author = models.ForeignKey(
+        PlatformUser, blank=True, null=True, on_delete=models.DO_NOTHING)
+    community = models.ForeignKey(Community, on_delete=models.DO_NOTHING)
+    text = models.TextField(blank=True, default='')
+    platform = models.ForeignKey(
+        Platform, default=host_platform, on_delete=models.DO_NOTHING)
+    post = models.ForeignKey(
+        Post, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

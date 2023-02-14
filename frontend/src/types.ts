@@ -23,17 +23,29 @@ export interface Community {
     name?: string;
     createdAt?: string;
     updatedAt?: string;
-    platform?: number | string;
+    platform?: any;
 }
 
 export interface Post {
     id?: string;
-    author?: number | string | null;
-    community?: number | string;
-    platform?: number | string;
+    author?: any;
+    community?: any;
+    platform?: any;
     url?: string;
     title: string;
     text?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface Comment {
+    id?: string;
+    author?: any;
+    community?: any;
+    text?: string;
+    post?: any;
+    postId?: any;
+    platform?: any;
     createdAt?: string;
     updatedAt?: string;
 }

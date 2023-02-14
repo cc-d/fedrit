@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Post } from '../../types';
 import authAxios from '../../utils';
 import { API_URL, BASE_URL } from '../../config';
-import { CommunityPost } from './Post';
+import CommunityPost from './Post';
 
 const Community: react.FC = (() => {
   const { communityName, communityId } = useParams();
@@ -12,7 +12,9 @@ const Community: react.FC = (() => {
 
   const fetchPosts = async() => {
     try {
-      const response = await authAxios.get(`${API_URL}/community/${communityName}/posts`);
+      const response: any = await authAxios.get(
+        `${API_URL}/community/${communityName}/posts`);
+      return response.data;
     } catch (err) {
       console.error(err);
     }
@@ -22,27 +24,36 @@ const Community: react.FC = (() => {
     if (getPosts === null) {
       setGetPosts(true);
     } else if (getPosts === true) {
-      fetchPosts().then(() => setGetPosts(false));
+      fetchPosts().then((data: Array<Post>) => {
+        console.log('fetchposthten');
+        console.log(data);
+        setPosts(data);
+      }).finally(() => {
+        setGetPosts(false);
+      });
     }
-  }, [posts, getPosts])
+  }, [getPosts])
+
+  console.log('isposts');
+  console.log(posts);
 
   return (
-    <>
-        <Link to={`/c/${communityName}/create_post`}>New Post</Link>
-      <div>
+      <>
+      <Link to={`/c/${communityName}/create_post`}>New Post</Link>
         <h1>
           Community
-          {communityName ? `Name: ${communityName} ${communityId}`
-            : `ID: ${communityName} ${communityId}`}
+          <>
+            {communityName ? `Name: ${communityName} ${communityId}`
+              : `ID: ${communityName} ${communityId}`}
+          </>
         </h1>
         <h1>Posts:</h1>
-        <>
-          {posts && posts.map((post) => {
-            <CommunityPost key={post.id} />
-          })}
-        </>
-      </div>
-    </>
+        {posts && posts.map((post: Post) => {
+          return (
+            <CommunityPost id={post.id} post={post} />
+          )
+        })}
+      </>
   );
 })
 

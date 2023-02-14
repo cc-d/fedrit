@@ -1,3 +1,4 @@
+from .models import Comment
 import re
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
@@ -25,6 +26,7 @@ class PlatformSerializer(ModelSerializer):
     class Meta:
         model = Platform
         fields = '__all__'
+        depth = 1
 
 
 @ts_interface()
@@ -45,6 +47,7 @@ class PlatformUserSerializer(ModelSerializer):
 
             'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
         }
+        depth = 1
 
     def validate(self, data):
         user_obj = None
@@ -78,7 +81,7 @@ class CommunitySerializer(ModelSerializer):
     class Meta:
         model = Community
         fields = '__all__'
-
+        depth = 1
         extra_kwargs = {
             'id': {'required': False},
             'community_type': {'required': False},
@@ -89,11 +92,13 @@ class CommunitySerializer(ModelSerializer):
 
     def validate(self, data):
         print('data',data,'context',self.context)
-        cname = self.context.get('community_name', None)
         cid = self.context.get('community_id', None)
         ctype = data.get('community_type', None)
+        cname = data.get('name', None)
+
         data['platform'] = host_platform()
-        data['name'] = cname
+        if 'name' not in data:
+            cname = self.context.get('community_name', None)
 
         print('vvvv', self.context, data)
 
@@ -134,7 +139,6 @@ class CommunitySerializer(ModelSerializer):
         return newcom
 
 
-
 @ts_interface()
 class PostSerializer(ModelSerializer):
     author = PlatformUserSerializer
@@ -145,7 +149,7 @@ class PostSerializer(ModelSerializer):
         model = Post
         fields = ('id', 'author', 'community', 'platform', 'url',
                   'title', 'text', 'created_at', 'updated_at')
-
+        depth = 1
         extra_kwargs = {
             'id': {'required': False},
             'platform': {'required': False, 'read_only': True},
@@ -181,6 +185,44 @@ class PostSerializer(ModelSerializer):
 
         return data
 
+
+@ts_interface()
+class CommentSerializer(ModelSerializer):
+    post = PostSerializer
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'author', 'community', 'text', 'post',
+                'post_id', 'platform', 'created_at', 'updated_at']
+        depth = 1
+        extra_kwargs = {
+            'id': {'required': False},
+            'platform': {'required': False, 'read_only': True},
+
+            'post': {'required': False},
+            'post_id': {'required': False},
+
+            'author': {'required': False},
+            'community': {'required': False, 'read_only': True},
+            'text': {'required': False},
+
+            'created_at': {'read_only': True, 'required': False},
+            'updated_at': {'read_only': True, 'required': False},
+        }
+
+    def validate(self, data):
+        pid = self.context.get('post_id', None)
+        try:
+            post = Post.objects.get(pk=pid)
+            comms = Comment.objects.filter(post=post).all()
+            data['post'] = post
+            data['comments'] = list(comms)
+        except Exception as e:
+            raise ValidationError(f'comm valid error {e}')
+        return data
+
+
+# Autogen
 
 LOCALS = dict(locals().items())
 

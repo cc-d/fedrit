@@ -19,9 +19,11 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from .models import (
     PlatformUser, Platform, Community, host_platform, Post,
+    Comment,
 )
 from .serializers import (
-    PlatformUserSerializer, CommunitySerializer, PostSerializer
+    PlatformUserSerializer, CommunitySerializer, PostSerializer,
+    CommentSerializer,
 )
 
 import logging
@@ -29,12 +31,11 @@ logger = logging.getLogger(__name__)
 
 class AuthViewSet(viewsets.ModelViewSet):
     queryset = PlatformUser.objects.all()
-    authentication_classes = [TokenAuthentication]
     serializer_class = PlatformUserSerializer
 
     def get_permissions(self):
         if self.action in ['logout']:
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [AllowAny()]
 
     @action(methods=['POST'], detail=False)
@@ -51,7 +52,10 @@ class AuthViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def logout(self, request):
-        request.user.auth_token.delete()
+        try:
+            request.user.auth_token.delete()
+        except AttributeError as e:
+            pass
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=['POST'], detail=False)
@@ -144,3 +148,14 @@ class PostViewSet(viewsets.ModelViewSet):
             platform=host_platform(), community=vdata['community'],
             author=author)
         return Response(PostSerializer(newpost).data)
+
+    @action(methods=['GET'], detail=False)
+    def comments(self, request, **kwargs):
+        print('ddddddd',request)
+        serializer = CommentSerializer(data=request.data, context=kwargs)
+        serializer.is_valid(raise_exception=True)
+        vdata = serializer.validated_data
+        return Response({
+            'post': PostSerializer(vdata['post']).data,
+            'comments': [CommentSerializer(c).data for c in vdata['comments']],
+        })

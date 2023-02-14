@@ -24,7 +24,7 @@ const CreatePost: react.FC = (() => {
                 title: title,
                 text: text,
             });
-            navigate(`${BASE_URL}/c/${communityName}`);
+            navigate(`/c/${communityName}`);
 
         } catch (err) {
             console.error(err);
