@@ -18,6 +18,8 @@ const PostComments: react.FC<any> = () => {
     const [comms, setComms] = useState<Array<Comment> | null>(null);
     const [getPCs, setGetPCs] = useState<boolean | null>(null);
 
+    const [newComm, setNewComm] = useState<string | null>(null);
+
     const fetchPCs = async () => {
         try {
             const response: any = await authAxios.get(
@@ -26,6 +28,10 @@ const PostComments: react.FC<any> = () => {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    const handleNewComm = async () => {
+        
     }
 
     useEffect(() => {
@@ -54,6 +60,15 @@ const PostComments: react.FC<any> = () => {
                 </>
         </div>
         <div>
+            <h1>create post for {communityId} {communityName}</h1>
+            <form id="form-new-comm" onSubmit={(e) => handleNewComm()}>
+                <input id="input-new-comm"
+                    type="text"
+                    placeholder="new comment text"
+                    onChange={e => setNewComm(e.target.value)}
+                />
+                <button type="submit">Comment</button>
+            </form>
             <h2>Comments:</h2>
             <>
                 {comms && 
