@@ -1,0 +1,21 @@
+#root, body {
+  color: #333;
+  background-color: #eee;
+}
+
+#root.dark, body.dark {
+  color: #ccc;
+  background-color: #111;
+}
+
+/*
+.community-post {
+    color: $textColor;
+    background-color: $backColor;
+}
+
+.community-post .dark {
+    background-color: $backColorDark;
+}*/
+
+/*# sourceMappingURL=styles.css.map */

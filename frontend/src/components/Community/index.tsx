@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Post } from '../../types';
 import authAxios from '../../utils';
 import { API_URL, BASE_URL } from '../../config';
-import CommunityPost from './Post';
+import CommunityPost from '../CommunityPost';
 
 const Community: react.FC = (() => {
   const { communityName, communityId } = useParams();

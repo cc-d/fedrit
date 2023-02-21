@@ -2,13 +2,13 @@ import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlatformUser } from '../../types';
-import { AuthContext, AuthContextProps } from '../../AuthProvider';
+import { AuthContext, AuthContextProps } from '../../auth';
 import { API_URL, BASE_URL } from '../../config';
 import authAxios from '../../utils';
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
-  const { user, setUser }: any = useContext(AuthContext);
+  const { user, setUser, dark, setDark }: any = useContext(AuthContext);
 
   const handleLogout = async () => {
     await authAxios.post(`${API_URL}/auth/logout`)
@@ -21,8 +21,16 @@ const NavBar: React.FC = () => {
     });
   };
 
+  const handleTheme = async () => {
+    if (dark) {
+      setDark('');
+    } else {
+      setDark(' dark');
+    }
+  }
+
   return (
-    <nav>
+    <nav className={dark}>
       <ul>
         <li>
           <Link to='/'>Home</Link>
@@ -45,6 +53,9 @@ const NavBar: React.FC = () => {
             </li>
           </>
         )}
+        <li>
+          <button onClick={handleTheme}>switch theme</button>
+        </li>
       </ul>
       <h1>
         User: { user?.username }

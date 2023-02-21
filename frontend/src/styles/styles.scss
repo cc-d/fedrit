@@ -1,0 +1,44 @@
+// Variables for light theme
+$c0: #000;
+$c1: #111;
+$c2: #222;
+$c3: #333;
+$c4: #444;
+$c5: #555;
+$c6: #666;
+$c7: #777;
+$c8: #888;
+$c9: #999;
+$ca: #aaa;
+$cb: #bbb;
+$cc: #ccc;
+$cd: #ddd;
+$ce: #eee;
+$cf: #fff;
+
+$textColor: $c3;
+$textColorDark: $cc;
+
+$backColor: $ce;
+$backColorDark: $c1;
+
+#root, body {
+    color: $textColor;
+    background-color: $backColor;
+}
+
+#root.dark, body.dark {
+    color: $textColorDark;
+    background-color: $backColorDark;
+}
+
+// light theme (default)
+/*
+.community-post {
+    color: $textColor;
+    background-color: $backColor;
+}
+
+.community-post .dark {
+    background-color: $backColorDark;
+}*/

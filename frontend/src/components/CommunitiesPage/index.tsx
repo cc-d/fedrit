@@ -5,7 +5,7 @@ import {
 } from 'react-router-dom';
 import authAxios from '../../utils';
 import { API_URL, BASE_URL } from '../../config';
-import { AuthContext, AuthContextProps } from '../../AuthProvider';
+import { AuthContext, AuthContextProps } from '../../auth';
 
 const CommunitiesPage: React.FC = () => {
     const { user, setUser, getUser }: any = useContext(AuthContext);
