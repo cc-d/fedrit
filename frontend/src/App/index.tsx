@@ -5,17 +5,17 @@ import {
   BrowserRouter, Routes, Route, Link,
 } from 'react-router-dom';
 
-import AuthProvider from './AuthProvider';
+import AuthProvider from '../AuthProvider';
 
-import AboutPage from './components/AboutPage';
-import CommunitiesPage from './components/CommunitiesPage';
-import CreateCommunityPage from './components/CreateCommunityPage';
-import LoginPage from './components/LoginPage';
-import HomePage from './components/HomePage';
-import NavBar from './components/NavBar';
-import Community from './components/Community';
-import CreatePost from './components/CreatePost';
-import PostComments from './components/Post';
+import AboutPage from '../components/AboutPage';
+import CommunitiesPage from '../components/CommunitiesPage';
+import CreateCommunityPage from '../components/CreateCommunityPage';
+import LoginPage from '../components/LoginPage';
+import HomePage from '../components/HomePage';
+import NavBar from '../components/NavBar';
+import Community from '../components/Community';
+import CreatePost from '../components/CreatePost';
+import PostComments from '../components/Post';
 
 
 function App() {

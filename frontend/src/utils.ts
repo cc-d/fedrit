@@ -1,10 +1,18 @@
 import axios from 'axios';
 import { BASE_URL } from './config';
 
-const authAxios = axios.create({
-  headers: {
-    'Authorization': `Token ${localStorage.getItem('token')}`
+const getAxConfig = (): object => {
+  /* gets headers config for axios */
+  let utoken: string | null = localStorage.getItem('token');
+  let retobj: any = {};
+  if (utoken) {
+    retobj['Authorization'] = `Token ${utoken}`;
   }
+  return retobj;
+}
+
+const authAxios = axios.create({
+  headers: getAxConfig()
 });
 
 authAxios.interceptors.request.use((config) => {

@@ -159,3 +159,11 @@ class PostViewSet(viewsets.ModelViewSet):
             'post': PostSerializer(vdata['post']).data,
             'comments': [CommentSerializer(c).data for c in vdata['comments']],
         })
+
+    @action(methods=['GET'], detail=False)
+    def all(self, request):
+        posts = list(Post.objects.all())
+        posts = [PostSerializer(p).data for p in posts]
+        return Response(posts)
+
+
