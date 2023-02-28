@@ -1,3 +1,5 @@
+/* main stylesheet */
+
 // Variables for light theme
 $c0: #000;
 $c1: #111;
@@ -16,15 +18,27 @@ $cd: #ddd;
 $ce: #eee;
 $cf: #fff;
 
-$textColor: $c3;
-$textColorDark: $cc;
+$textColor: $c0;
+$textColorDark: $cf;
 
-$backColor: $ce;
-$backColorDark: $c1;
+$backColor: $cf;
+$backColorDark: $c0;
+
+$navColor: $cd;
+$navColorDark: $c2;
+
+$divColor: $c4;
+$divColorDark: $cc;
+
+* {
+    margin: 0px;
+}
 
 #root, body {
     color: $textColor;
     background-color: $backColor;
+    height: 100vh;
+    width: 100vw;
 }
 
 #root.dark, body.dark {
@@ -32,13 +46,29 @@ $backColorDark: $c1;
     background-color: $backColorDark;
 }
 
-// light theme (default)
-/*
-.community-post {
-    color: $textColor;
-    background-color: $backColor;
+nav {
+    background-color: $navColor;
 }
 
-.community-post .dark {
-    background-color: $backColorDark;
-}*/
+nav > * {
+    color: $textColor;
+}
+
+nav.dark {
+    color: $textColorDark;
+    background-color: $navColorDark;
+}
+
+nav.dark > * {
+    color: $textColorDark;
+}
+
+.navlink {
+    margin: 4px;
+    color: $textColor
+}
+
+.navuser {
+    display: inline;
+    font-weight: 600;
+}

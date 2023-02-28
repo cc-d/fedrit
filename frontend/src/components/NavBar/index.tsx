@@ -12,13 +12,13 @@ const NavBar: React.FC = () => {
 
   const handleLogout = async () => {
     await authAxios.post(`${API_URL}/auth/logout`)
-    .then((resp) => {
-      setUser(null);
-      localStorage.removeItem('token');
-      window.location.href = `/`
-    }).catch((err) => {
-      console.error(err);
-    });
+      .then((resp) => {
+        setUser(null);
+        localStorage.removeItem('token');
+        window.location.href = `/`
+      }).catch((err) => {
+        console.error(err);
+      });
   };
 
   const handleTheme = async () => {
@@ -30,36 +30,27 @@ const NavBar: React.FC = () => {
   }
 
   return (
-    <nav className={dark}>
-      <ul>
-        <li>
-          <Link to='/'>Home</Link>
-        </li>
-        <li>
-          <Link to='/about'>About</Link>
-        </li>
-        {!user && (
-          <li>
-            <Link to='/login'>Login</Link>
-          </li>
-        )}
-        {user && (
-          <>
-            <li>
-              <Link to='/logout' onClick={handleLogout}>Logout</Link>
-            </li>
-            <li>
-              <Link to='/community/all'>Communities</Link>
-            </li>
-          </>
-        )}
-        <li>
-          <button onClick={handleTheme}>switch theme</button>
-        </li>
-      </ul>
-      <h1>
-        User: { user?.username }
-      </h1>
+    <nav
+      className={dark}
+      style={{
+
+      }}
+    >
+      <Link to='/' className='navlink'>Home</Link>
+      <Link to='/about' className='navlink'>About</Link>
+      {!user && (
+        <Link to='/login' className='navlink'>Login</Link>
+      )}
+      {user && (
+        <>
+          <Link to='/logout' className='navlink' onClick={handleLogout}>Logout</Link>
+          <Link to='/community/all' className='navlink'>Communities</Link>
+        </>
+      )}
+      <button onClick={handleTheme}>switch theme</button>
+      <div className='navuser'>
+        User: {user?.username}
+      </div>
     </nav>
   );
 };

@@ -1,21 +1,45 @@
+/* main stylesheet */
+* {
+  margin: 0px;
+}
+
 #root, body {
-  color: #333;
-  background-color: #eee;
+  color: #000;
+  background-color: #fff;
+  height: 100vh;
+  width: 100vw;
 }
 
 #root.dark, body.dark {
-  color: #ccc;
-  background-color: #111;
+  color: #fff;
+  background-color: #000;
 }
 
-/*
-.community-post {
-    color: $textColor;
-    background-color: $backColor;
+nav {
+  background-color: #ddd;
 }
 
-.community-post .dark {
-    background-color: $backColorDark;
-}*/
+nav > * {
+  color: #000;
+}
+
+nav.dark {
+  color: #fff;
+  background-color: #222;
+}
+
+nav.dark > * {
+  color: #fff;
+}
+
+.navlink {
+  margin: 4px;
+  color: #000;
+}
+
+.navuser {
+  display: inline;
+  font-weight: 600;
+}
 
 /*# sourceMappingURL=styles.css.map */

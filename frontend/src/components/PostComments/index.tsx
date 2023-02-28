@@ -52,7 +52,7 @@ const PostComments: react.FC<any> = () => {
             <h2>Post:</h2>
                 <>
                 {post &&
-                    <div style={{border: '1px dashed black', margin: 4}}>
+                    <div style={{border: '1px dashed black'}}>
                             <h3>Title: {post.title}</h3>
                             <p>Text: {post.text}</p>
                     </div>

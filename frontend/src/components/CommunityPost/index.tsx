@@ -27,10 +27,10 @@ const CommunityPost: react.FC<Props> = ({ post }) => {
   return (
     <div
       className={'community-post' + dark}
-      style={{ margin: 4 }}
+      style={{  }}
       key={post.id}>
       <Link 
-        style={{ margin: 4, fontSize: '200%' }} 
+        style={{fontSize: '200%' }} 
         to={`/c/${useName}/p/${post.id}`}
       >
         {post.title}
@@ -39,7 +39,7 @@ const CommunityPost: react.FC<Props> = ({ post }) => {
         {post.author.username}
       </p>
       <p style={{
-        margin: 4
+
       }}>
         {post.text}
       </p>
