@@ -21,16 +21,49 @@ HOST_PLATFORM = {
 
 AUTH_USER_MODEL = 'api.PlatformUser'
 
-LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)d | %(message)s'
+
+##### LOGGING #####
 LOGLEVEL = logging.DEBUG
 
-logging.basicConfig(
-    level=LOGLEVEL,
-    format=LOGFORMAT,
-    handlers=[logging.StreamHandler()],
-)
+LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s.%(funcName)s:%(lineno)d | %(message)s'
+LFORMAT = '%(asctime)s %(levelname)s %(message)s'
+
+lformat1 = logging.Formatter(LOGFORMAT)
+shandler1 = logging.StreamHandler()
+
+lformat2 = logging.Formatter(LFORMAT)
+shandler2 = logging.StreamHandler()
+
+shandler1.setFormatter(lformat1)
+shandler2.setFormatter(lformat2)
+
+# Create logger configurations
+logger_configs = {
+    __name__: {
+        'level': LOGLEVEL,
+        'handlers': [shandler1]
+    },
+    'logf': {
+        'level': LOGLEVEL,
+        'handlers': [shandler2]
+    }
+}
 
 logger = logging.getLogger(__name__)
+logger.addHandler(shandler1)
+
+lflogger = logging.getLogger('logf')
+lflogger.addHandler(shandler2)
+
+logging.basicConfig(level=LOGLEVEL, format=LOGFORMAT)
+
+for name, config in logger_configs.items():
+    logger = logging.getLogger(name)
+    logger.setLevel(config['level'])
+    logger.handlers = config['handlers']
+
+
+##### END LOGGING #####
 
 VALID_CHARS = string.ascii_letters + string.digits + '_' + '-'
 VALID_NAME_LEN_MAX = 30
