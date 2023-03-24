@@ -2,16 +2,16 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase
-from utils import (
+from ..utils import (
  valid_uuid, valid_name, valid_username,
  valid_url, gen_token_str, valid_token_str,
  pal,
 )
-from serializers import (
-    PlatformUserSerializer, PlatformSerializer, UserTokenSerializer
+from ..serializers import (
+    PlatformUserSerializer, PlatformSerializer, PlatUserTokenSerializer
 )
-from models import (
-    PlatformUser, Platform, UserToken
+from ..models import (
+    PlatformUser, Platform, PlatUserToken, goc_host,
 )
 import logging
 
@@ -99,13 +99,13 @@ class TestModels(TestCase):
         self.platform_user = PlatformUser.objects.create_user(
             username='testplatformuser', password='testpassword')
         self.platform = Platform.objects.create(name='Test Platform')
-        self.user_token = UserToken.objects.create(
+        self.user_token = PlatUserToken.objects.create(
             user=self.platform_user, platform=self.platform)
 
     def test_platform_user_creation(self):
         self.assertIsNotNone(self.platform_user)
         self.assertEqual(self.platform_user.username,
-                         'testplatformuser@{}'.format(Platform.get_or_create_host().name))
+                         'testplatformuser@{}'.format(goc_host(host_id=False).name))
 
     def test_platform_creation(self):
         self.assertIsNotNone(self.platform)
@@ -129,14 +129,14 @@ class TestSerializers(APITestCase):
         self.platform_user = PlatformUser.objects.create_user(
             username='testplatformuser', password='testpassword')
         self.platform = Platform.objects.create(name='Test Platform')
-        self.user_token = UserToken.objects.create(
+        self.user_token = PlatUserToken.objects.create(
             user=self.platform_user, platform=self.platform)
 
     def test_platform_user_serializer(self):
         serializer = PlatformUserSerializer(self.platform_user)
         self.assertIsNotNone(serializer)
         self.assertEqual(
-            serializer.data['username'], 'testplatformuser@{}'.format(Platform.get_or_create_host().name))
+            serializer.data['username'], 'testplatformuser@{}'.format(goc_host(host_id=False).name))
 
     def test_platform_serializer(self):
         serializer = PlatformSerializer(self.platform)
@@ -144,10 +144,10 @@ class TestSerializers(APITestCase):
         self.assertEqual(serializer.data['name'], 'Test Platform')
 
     def test_user_token_serializer(self):
-        serializer = UserTokenSerializer(self.user_token)
+        serializer = PlatUserTokenSerializer(self.user_token)
         self.assertIsNotNone(serializer)
         self.assertEqual(serializer.data['user']['username'],
-                         'testplatformuser@{}'.format(Platform.get_or_create_host().name))
+                         'testplatformuser@{}'.format(goc_host(host_id=False).name))
         self.assertEqual(serializer.data['platform']['name'], 'Test Platform')
 
     def tearDown(self):
@@ -163,12 +163,12 @@ class TestViews(APITestCase):
         self.platform_user = PlatformUser.objects.create_user(
             username='testplatformuser', password='testpassword')
         self.platform = Platform.objects.create(name='Test Platform')
-        self.user_token = UserToken.objects.create(
+        self.user_token = PlatUserToken.objects.create(
             user=self.platform_user, platform=self.platform)
 
-    def test_create_usertoken_view(self):
-        # replace 'usertoken-create_usertoken' with the correct URL name
-        url = reverse('usertoken-create_usertoken')
+    def test_create_PlatUserToken_view(self):
+        # replace 'PlatUserToken-create_PlatUserToken' with the correct URL name
+        url = reverse('PlatUserToken-create_PlatUserToken')
         response = self.client.post(url, {'user_id': self.platform_user.id})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 

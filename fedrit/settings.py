@@ -15,7 +15,7 @@ from pathlib import Path
 
 ##### Custom Vars #####
 class HOST:
-    name = 'fedrit',
+    name = 'fedrit'
     domain = 'fedrit.com'
 
 
@@ -24,7 +24,7 @@ LOGLEVEL = logging.DEBUG
 LOGFLEVEL = logging.DEBUG
 logging.basicConfig(level=LOGLEVEL)
 
-LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s.%(funcName)s:%(lineno)d | %(message)s'
+LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s:%(funcName)s:%(lineno)d | %(message)s'
 LFORMAT = '%(asctime)s %(levelname)s %(message)s'
 
 lformat1 = logging.Formatter(LOGFORMAT)
@@ -70,6 +70,7 @@ VALID_NAME_CHARS = string.ascii_letters + string.digits + '_' + '-'
 
 CORS_ORIGIN_ALLOW_ALL = True
 ##### End Custom Vars #####
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -187,3 +188,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+AUTH_USER_MODEL = 'api.PlatformUser'

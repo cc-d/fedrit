@@ -8,14 +8,14 @@ import re
 import string
 from typing import *
 from fedrit.settings import (
-    VALID_CHARS, VALID_NAME_LEN_MAX, 
+    VALID_CHARS, VALID_NAME_LEN_MAX,
     VALID_NAME_CHARS, LOGLEVEL, LOGFLEVEL
 )
 from secrets import token_urlsafe
 
 lflogger = logging.getLogger('logf')
 logger = logging.getLogger(__name__)
-    
+
 
 class SLIT:
     """ used for typehints """
@@ -23,7 +23,7 @@ class SLIT:
     platform = 'api.models.Platform'
     post = 'api.models.Post'
     comment = 'api.models.Comment'
-    usertoken = 'api.models.UserToken'
+    PlatUserToken = 'api.models.PlatUserToken'
     token = 'api.models.Token'
 
 
@@ -59,7 +59,7 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
     Returns:
         Callable[[T], T]: The wrapped function.
     """
-    
+
     def decorator(func: T) -> T:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -76,11 +76,11 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
             funcfname = os.path.basename(
                 inspect.getmodule(func).__file__)
 
-            message = (f"{funcfname}:{lineno} {extime:.4f} {func.__name__}() "
-                       f"| args={args} kwargs={kwargs}) >>>>> {result}")
+            message = (f"{extime:.4f} {func.__name__}() "
+                       f"{args} {kwargs} || {result}")
 
             # Log the message using the specified level.
-            lflogger.log(LOGFLEVEL, message)
+            lflogger.log(lmap[level], message)
 
             return result
         return wrapper
@@ -97,7 +97,7 @@ def pal(*args) -> str:
     msg = ' '.join((str(a) for a in args))
     print('PRINT PAL():', msg)
     logger.debug(f'PAL() LOGGER: {msg}')
-    
+
     return msg
 
 
@@ -182,12 +182,12 @@ def valid_token_str(tokenstr: str) -> bool:
     """
     if len(str(tokenstr)) != 47:
         return False
-    
+
     rmatch = re.match(r'^(fdr-[a-zA-Z_\-0-9]+)', str(tokenstr))
-    
+
     if rmatch is None:
         return False
-    
+
     rgroups = rmatch.groups()
     if len(rgroups) == 1 and rgroups[0] == tokenstr:
         return True

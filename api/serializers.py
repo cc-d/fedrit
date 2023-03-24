@@ -1,19 +1,20 @@
 import re
 from django_typomatic import ts_interface, get_ts, generate_ts
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.db.models import Q
+from django.conf import settings
 from rest_framework.serializers import (
     ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from models import (
-    User, PlatformUser, Platform,
+from .models import (
+    PlatformUser, Platform,
     HOST, Community, Post, Comment,
-    UserToken,
+    PlatUserToken, goc_host
 )
-from utils import (
+from .utils import (
     valid_name, valid_url, valid_uuid, valid_username,
     def_kwargs, modchoice
 )
@@ -33,7 +34,6 @@ class PlatformSerializer(ModelSerializer):
 class PlatformUserSerializer(ModelSerializer):
     token = CharField(allow_blank=True, read_only=True)
     platform = PlatformSerializer(read_only=True)
-    origin_username = CharField(allow_blank=True)
 
     class Meta:
         model = PlatformUser
@@ -53,11 +53,15 @@ class PlatformUserSerializer(ModelSerializer):
         user_obj = None
         username = data.get('username', None)
         password = data.get('password', None)
-        data['platform'] = Platform.get_or_create_host()
+        host = goc_host(host_id=False)
+        data['platform'] = host
 
         if not username or not password:
             raise ValidationError('missing username or password')
-        elif not valid_username(username):
+        else:
+            username = f'{username}@{host.name}'
+
+        if not valid_username(username):
             raise ValidationError('invalid username')
         elif password is not None and len(str(password)) < 8:
             raise ValidationError('password too short')
@@ -96,7 +100,7 @@ class CommunitySerializer(ModelSerializer):
         ctype = data.get('community_type', None)
         cname = data.get('name', None)
 
-        data['platform'] = Platform.get_or_create_host()
+        data['platform'] = goc_host(host_id=False)
         if 'name' not in data:
             cname = self.context.get('community_name', None)
 
@@ -223,12 +227,12 @@ class CommentSerializer(ModelSerializer):
 
 
 @ts_interface()
-class UserTokenSerializer(ModelSerializer):
+class PlatUserTokenSerializer(ModelSerializer):
     user = PlatformUserSerializer()
     platform = PlatformSerializer()
 
     class Meta:
-        model = UserToken
+        model = PlatUserToken
         fields = ['id', 'user', 'platform', 'token']
         read_only_fields = ['token']
         depth = 1

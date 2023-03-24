@@ -6,8 +6,10 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django_typomatic import ts_interface, get_ts, generate_ts
+
 from django.shortcuts import render
 from django.db.utils import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import views, status, viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
@@ -17,17 +19,19 @@ from rest_framework.permissions import (
 )
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from models import (
+from .models import (
     PlatformUser, Platform, Community, Post,
-    Comment, UserToken
+    Comment, PlatUserToken, goc_host
 )
-from serializers import (
+from .serializers import (
     PlatformUserSerializer, CommunitySerializer, PostSerializer,
-    CommentSerializer, UserTokenSerializer,
+    CommentSerializer, PlatUserTokenSerializer,
 )
+from .utils import logf
 
 import logging
 logger = logging.getLogger(__name__)
+
 
 class AuthViewSet(viewsets.ModelViewSet):
     queryset = PlatformUser.objects.all()
@@ -43,6 +47,7 @@ class AuthViewSet(viewsets.ModelViewSet):
         user = authenticate(
             username=request.data['username'],
             password=request.data['password'])
+
         if user:
             token = Token.objects.get_or_create(user=user)[0]
             return Response({'token': token.key})
@@ -76,15 +81,19 @@ class TokenUserView(APIView):
     """
     Determine the current user by their token, and return their data
     """
+    @logf(level='info')
     def post(self, request):
         token = request.data.get('token', None)
-        token = Token.objects.filter(key=token).first()
-        if token:
-            user = token.user
-            user.token = token
-            serializer = PlatformUserSerializer(user)
-            return Response(serializer.data)
-        return Response({'error':'no token found'})
+        logger.debug(f'token get_or_create {token}')
+
+        try:
+            token = Token.objects.get(key=token)
+        except ObjectDoesNotExist:
+            return Response({'error': 'no token found'})
+
+        user = token.user
+        serializer = PlatformUserSerializer(user)
+        return Response(serializer.data)
 
 
 class CommunityViewSet(viewsets.ModelViewSet):
@@ -103,7 +112,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def all(self, request):
         comms = list(Community.objects \
-            .filter(platform=Platform.get_or_create_host()) \
+            .filter(platform=goc_host(host_id=False)) \
             .all())
         return Response([CommunitySerializer(c).data for c in comms])
 
@@ -135,7 +144,7 @@ class PostViewSet(viewsets.ModelViewSet):
             'community_id': request.data.get('community_id', None),
             'community_name': request.data.get('community_name', None),
             'author': request.user,
-            'platform': Platform.get_or_create_host()
+            'platform': goc_host(host_id=False)
         }
 
         serializer = self.get_serializer(data=request.data, context=context)
@@ -145,7 +154,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         newpost = Post.objects.create(
             title=vdata['title'], text=vdata['text'],
-            platform=Platform.get_or_create_host(), community=vdata['community'],
+            platform=goc_host(host_id=False), community=vdata['community'],
             author=author)
         return Response(PostSerializer(newpost).data)
 
@@ -167,20 +176,20 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(posts)
 
 
-class UserTokenViewSet(viewsets.ModelViewSet):
-    queryset = UserToken.objects.all()
-    serializer_class = UserTokenSerializer
+class PlatUserTokenViewSet(viewsets.ModelViewSet):
+    queryset = PlatUserToken.objects.all()
+    serializer_class = PlatUserTokenSerializer
 
     @action(methods=['POST'], detail=False)
-    def create_usertoken(self, request, **kwargs):
+    def create_PlatUserToken(self, request, **kwargs):
         serializer = self.get_serializer(data=request.data, context=kwargs)
         serializer.is_valid(raise_exception=True)
         vdata = serializer.validated_data
 
-        ptoken = UserToken.objects \
+        ptoken = PlatUserToken.objects \
             .create(user=vdata['user'], platform=vdata['platform'])
 
-        logger.debug(f'UserToken {ptoken} created')
+        logger.debug(f'PlatUserToken {ptoken} created')
         return Response({
 
         })

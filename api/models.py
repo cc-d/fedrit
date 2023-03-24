@@ -3,9 +3,10 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 from django.db import models
 from django.db.models import Q
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import (
-    User, AbstractUser, AbstractBaseUser
+    AbstractUser, Group, Permission,
 )
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
@@ -13,9 +14,8 @@ from fedrit.settings import (
     HOST, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
-from utils import SLIT, gen_token_str, logf
+from .utils import SLIT, gen_token_str, logf
 from typing import *
-from django.contrib.auth.models import AbstractUser, Group, Permission
 import logging
 logger = logging.getLogger(__name__)
 
@@ -56,17 +56,17 @@ class Platform(models.Model):
     def __str__(self):
         return f'<Platform {self.name}>'
 
-    def get_host():
-        return goc_host()
 
 
-def goc_host(obj=False) -> str:
+def goc_host(host_id=True):
     host, created = Platform.objects.get_or_create(host=True)
     if created:
         logger.info(f'host platform did not exist: {host} created')
-    if obj:
-        return host
-    return str(host.id)
+
+    if host_id:
+        return str(host.id)
+    return host
+
 
 
 class PlatformUser(AbstractUser):
@@ -96,16 +96,18 @@ class PlatformUser(AbstractUser):
 
 
     @classmethod
-    def create_user(cls, username, password, return_token=False) -> SLIT.platformuser:
+    def create_user(
+        cls, username, password, return_token=False
+    ):
         """ creates new PlatformUser assumes validated in serializer """
         if not username or not password:
             raise ValueError('Missing username, password')
 
-        platform = Platform.get_or_create_host()
+        platform = goc_host(host_id=False)
         return_token = True if return_token else False
 
-        origin_username = username
-        username = f'{username}@{platform.name}'
+        origin_username = username.split('@')[0]
+
         user = cls(
             username=username,
             origin_username=origin_username,
@@ -113,23 +115,26 @@ class PlatformUser(AbstractUser):
         user.set_password(password)
         user.save()
 
-        ptoken = UserToken.gen_user_token(user=user, platform=platform)
+        utoken = Token.objects.create(user=user)
+        logger.debug(f'get_or_create create_user utoken {utoken}')
+
+        ptoken = PlatUserToken.gen_user_token(user=user, platform=platform)
         logger.info(f'created plattoken for user {user} {platform}: {ptoken}')
 
-        utoken = Token.objects.create(user=user)
+
         if return_token:
             return (user, utoken)
         return (user,)
 
 
-class UserToken(models.Model):
+class PlatUserToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     platform = models.OneToOneField(
         Platform, default=goc_host, editable=False, on_delete=models.DO_NOTHING)
 
     user = models.OneToOneField(
         PlatformUser, editable=False, on_delete=models.DO_NOTHING,
-        related_name='usertoken')
+        related_name='PlatUserToken')
 
     # token_urlsafe(32) returns string w/ len 43
     token = models.CharField(
@@ -137,7 +142,7 @@ class UserToken(models.Model):
 
 
     def __repr__(self):
-        return f'<UserToken user={self.user} platform={self.platform}>'
+        return f'<PlatUserToken user={self.user} platform={self.platform}>'
 
     def __str__(self):
         return self.__repr__()
@@ -146,15 +151,15 @@ class UserToken(models.Model):
     def gen_user_token(
         user: Optional[SLIT.platformuser] = None,
         platform: Optional[SLIT.platform] = None
-    ) -> SLIT.usertoken:
+    ) -> SLIT.PlatUserToken:
         """_summary_
         Args:
             user (Optional[PlatformUser], optional): _description_. Defaults to None.
             platform (Optional[Platform], optional): _description_. Defaults to None.
         Returns:
-            UserToken: _description_
+            PlatUserToken: _description_
         """
-        return UserToken.objects.create(user=user, platform=platform)
+        return PlatUserToken.objects.create(user=user, platform=platform)
 
 
 class Community(models.Model):

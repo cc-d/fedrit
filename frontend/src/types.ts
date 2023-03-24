@@ -10,7 +10,7 @@ export interface Platform {
 export interface PlatformUser {
     id?: string;
     platform?: Platform;
-    originUsername: string;
+    originUsername?: string;
     createdAt?: string;
     updatedAt?: string;
     username: string;
@@ -51,7 +51,7 @@ export interface Comment {
     updatedAt?: string;
 }
 
-export interface UserToken {
+export interface PlatUserToken {
     id?: string;
     user: PlatformUser;
     platform: Platform;
