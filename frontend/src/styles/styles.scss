@@ -1,74 +1,55 @@
-/* main stylesheet */
+@import '_variables';
+@import '_global';
+@import '_homepage';
 
-// Variables for light theme
-$c0: #000;
-$c1: #111;
-$c2: #222;
-$c3: #333;
-$c4: #444;
-$c5: #555;
-$c6: #666;
-$c7: #777;
-$c8: #888;
-$c9: #999;
-$ca: #aaa;
-$cb: #bbb;
-$cc: #ccc;
-$cd: #ddd;
-$ce: #eee;
-$cf: #fff;
+// Variables for light and dark themes
+$bg-color-light: #f5f5f5;
+$bg-color-dark: #222;
+$text-color-light: #333;
+$text-color-dark: #eee;
+$accent-color-light: #007bff;
+$accent-color-dark: #1e90ff;
 
-$textColor: $c0;
-$textColorDark: $cf;
+// Choose light or dark theme by setting the value of $theme to 'light' or 'dark'
+$theme: 'light';
 
-$backColor: $cf;
-$backColorDark: $c0;
+// Use light or dark theme colors based on $theme value
+$bg-color: if($theme =='light', $bg-color-light, $bg-color-dark);
+$text-color: if($theme =='light', $text-color-light, $text-color-dark);
+$accent-color: if($theme =='light', $accent-color-light, $accent-color-dark);
 
-$navColor: $cd;
-$navColorDark: $c2;
-
-$divColor: $c4;
-$divColorDark: $cc;
-
-* {
-    margin: 0px;
+// Apply theme colors to page elements
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: $bg-color;
+    color: $text-color;
 }
 
-#root, body {
-    color: $textColor;
-    background-color: $backColor;
-    height: 100vh;
-    width: 100vw;
+.page-container {
+    padding: 16px;
 }
 
-#root.dark, body.dark {
-    color: $textColorDark;
-    background-color: $backColorDark;
+.link {
+    color: $accent-color;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
-nav {
-    background-color: $navColor;
-}
+.button {
+    background-color: $accent-color;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 8px 12px;
 
-nav > * {
-    color: $textColor;
-}
-
-nav.dark {
-    color: $textColorDark;
-    background-color: $navColorDark;
-}
-
-nav.dark > * {
-    color: $textColorDark;
-}
-
-.navlink {
-    margin: 4px;
-    color: $textColor
-}
-
-.navuser {
-    display: inline;
-    font-weight: 600;
+    &:hover {
+        opacity: 0.8;
+    }
 }

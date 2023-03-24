@@ -4,5 +4,47 @@
         "./venv/lib/python3.10/site-packages",
         "venv/lib/python3.10/site-packages",
     ],
+    "node-module-path": "frontend/node_modules/",
+    "editor.rulers": [120],
+
+    
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "~/.pyenv/versions/3.10.10/bin/pylint",
+    "python.linting.pylintArgs": [
+        "--load-plugins=pylint_django,pylint_celery,pylint_flask",
+        "--disable=all",
+        "--enable=F,E,W",
+        "--max-line-length=120",
+        "--ignore-missing-imports",
+        "--init-hook='import sys; sys.path.insert(0, \"./\")'",
+        "--output-format=colorized",
+        "--reports=no",
+        "--score=n",
+        "--jobs=4"
+    ],
+
+
+
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.tslint": true
+    },
+    "eslint.alwaysShowStatus": true,
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
+    "eslint.options": {
+        "extensions": [
+            ".js",
+            ".jsx",
+            ".ts",
+            ".tsx"
+        ]
+    },
+    "eslint.workingDirectories": [
+        "./src"
+    ]
 
 }

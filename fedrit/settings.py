@@ -22,6 +22,7 @@ class HOST:
 ##### LOGGING #####
 LOGLEVEL = logging.DEBUG
 LOGFLEVEL = logging.DEBUG
+logging.basicConfig(level=LOGLEVEL)
 
 LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s.%(funcName)s:%(lineno)d | %(message)s'
 LFORMAT = '%(asctime)s %(levelname)s %(message)s'

@@ -1,0 +1,15 @@
+// Variables for light and dark themes
+$bg-color-light: #f5f5f5;
+$bg-color-dark: #222;
+$text-color-light: #333;
+$text-color-dark: #eee;
+$accent-color-light: #007bff;
+$accent-color-dark: #1e90ff;
+
+// Choose light or dark theme by setting the value of $theme to 'light' or 'dark'
+$theme: 'light';
+
+// Use light or dark theme colors based on $theme value
+$bg-color: if($theme =='light', $bg-color-light, $bg-color-dark);
+$text-color: if($theme =='light', $text-color-light, $text-color-dark);
+$accent-color: if($theme =='light', $accent-color-light, $accent-color-dark);
