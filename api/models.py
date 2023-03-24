@@ -13,6 +13,7 @@ from fedrit.settings import (
     HOST_PLATFORM, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
+from dbutils import gen_token_str
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,9 +36,6 @@ class Platform(models.Model):
     name = models.CharField(max_length=VALID_NAME_LEN_MAX)
     domain = models.CharField(max_length=255)
 
-    #pgpkey = models.ForeignKey(
-    #    PGPKey, blank=True, null=True, on_delete=models.DO_NOTHING)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,6 +44,7 @@ class Platform(models.Model):
 
     def __str__(self):
         return f'<Platform {self.name}>'
+
 
 def host_platform() -> Platform:
     print('hosterd platform')
@@ -61,6 +60,7 @@ def host_platform() -> Platform:
     return host
 
 
+
 class PlatformUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -68,9 +68,6 @@ class PlatformUser(AbstractUser):
     platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
 
     origin_username = models.CharField(max_length=VALID_NAME_LEN_MAX)
-
-    #pgpkey = models.ForeignKey(
-    #    PGPKey, null=True, blank=True, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -104,6 +101,17 @@ class PlatformUser(AbstractUser):
         if return_token:
             return (user, utoken)
         return (user,)
+    
+
+class UserToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    platform = models.OneToOneField(
+        Platform, default=host_platform, editable=False, on_delete=models.DO_NOTHING)
+    # token_urlsafe(32) returns string w/ len 43
+    token = models.CharField(
+        max_length=47, null=False, default=gen_token_str)
+    user = models.OneToOneField(
+        PlatformUser, editable=False, on_delete=models.DO_NOTHING)
 
 
 class Community(models.Model):

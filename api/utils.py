@@ -3,8 +3,12 @@ import string
 from typing import *
 from .models import (
     Platform, PlatformUser, Community, Post,
+    UserToken,
 )
-from fedrit.settings import VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
+from fedrit.settings import (
+    VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
+)
+from secrets import token_urlsafe
 
 
 def valid_uuid(string):
@@ -69,6 +73,11 @@ def valid_url(url: str) -> bool:
     return re.match(regex, url) is not None
 
 
+def gen_token_str() -> str:
+    return f'fdr-{token_urlsafe(32)}'
+
+
+
 def def_kwargs(*args, **kwargs) -> dict:
     dk = dict(kwargs)
     dk['id'] = {'required': False}
@@ -76,6 +85,7 @@ def def_kwargs(*args, **kwargs) -> dict:
     dk['updated_at'] = {'read_only': True}
     print('dk', dk)
     return dk
+
 
 def modchoice(t: str, choice: tuple):
     t = str(t).upper()

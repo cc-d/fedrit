@@ -1,4 +1,3 @@
-from .models import Comment
 import re
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.contrib.auth import authenticate, get_user_model
@@ -9,10 +8,10 @@ from rest_framework.serializers import (
     ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from .models import (
-    User, PlatformUser, Platform, host_platform, Community, Post
+from models import (
+    User, PlatformUser, Platform, host_platform, Community, Post, Comment
 )
-from .utils import (
+from utils import (
     valid_name, valid_url, valid_uuid, valid_username,
     def_kwargs, modchoice
 )
