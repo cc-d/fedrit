@@ -23,6 +23,7 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'auth', api.views.AuthViewSet)
 router.register(r'community', api.views.CommunityViewSet)
 router.register(r'post', api.views.PostViewSet)
+router.register(r'user-tokens', api.views.UserTokenViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

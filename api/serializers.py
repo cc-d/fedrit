@@ -9,7 +9,9 @@ from rest_framework.serializers import (
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from models import (
-    User, PlatformUser, Platform, host_platform, Community, Post, Comment
+    User, PlatformUser, Platform, 
+    host_platform, Community, Post, Comment,
+    UserToken,
 )
 from utils import (
     valid_name, valid_url, valid_uuid, valid_username,
@@ -219,6 +221,17 @@ class CommentSerializer(ModelSerializer):
         except Exception as e:
             raise ValidationError(f'comm valid error {e}')
         return data
+    
+
+@ts_interface()
+class UserTokenSerializer(ModelSerializer):
+    user = PlatformUserSerializer
+    platform = PlatformSerializer
+
+    class Meta:
+        model = UserToken
+        fields = ['user', 'platform', 'token']
+        read_only_fields = ['token']
 
 
 # Autogen

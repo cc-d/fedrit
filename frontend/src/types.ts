@@ -19,18 +19,18 @@ export interface PlatformUser {
 
 export interface Community {
     id?: string;
+    platform: Platform;
     communityType?: "SUB" | "IMGBOARD" | "FORUM";
     name?: string;
     createdAt?: string;
     updatedAt?: string;
-    platform?: any;
 }
 
 export interface Post {
     id?: string;
-    author?: any;
-    community?: any;
-    platform?: any;
+    author: PlatformUser;
+    community: Community;
+    platform: Platform;
     url?: string;
     title: string;
     text?: string;
@@ -43,10 +43,16 @@ export interface Comment {
     author?: any;
     community?: any;
     text?: string;
-    post?: any;
+    post: Post;
     postId?: any;
     platform?: any;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface UserToken {
+    user: PlatformUser;
+    platform: Platform;
+    token?: string;
 }
 
