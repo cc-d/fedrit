@@ -2,15 +2,15 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase
-from .utils import (
- valid_uuid, valid_name, valid_username, 
+from utils import (
+ valid_uuid, valid_name, valid_username,
  valid_url, gen_token_str, valid_token_str,
  pal,
 )
-from .serializers import (
+from serializers import (
     PlatformUserSerializer, PlatformSerializer, UserTokenSerializer
 )
-from .models import (
+from models import (
     PlatformUser, Platform, UserToken
 )
 import logging
@@ -62,7 +62,7 @@ class TestUtils(TestCase):
 
         invalids = ['htp://example', '//example.com', 'p://example.com',
                    'http://example', 'https://example.', 'http://example./']
-        
+
         for v in valids:
             print(v, valids.index(v))
             self.assertTrue(valid_url(v))

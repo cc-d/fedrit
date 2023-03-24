@@ -13,15 +13,15 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import (
-    AllowAny, IsAdminUser, IsAuthenticated, 
+    AllowAny, IsAdminUser, IsAuthenticated,
 )
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .models import (
+from models import (
     PlatformUser, Platform, Community, Post,
     Comment, UserToken
 )
-from .serializers import (
+from serializers import (
     PlatformUserSerializer, CommunitySerializer, PostSerializer,
     CommentSerializer, UserTokenSerializer,
 )
@@ -179,7 +179,7 @@ class UserTokenViewSet(viewsets.ModelViewSet):
 
         ptoken = UserToken.objects \
             .create(user=vdata['user'], platform=vdata['platform'])
-        
+
         logger.debug(f'UserToken {ptoken} created')
         return Response({
 

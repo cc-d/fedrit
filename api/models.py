@@ -13,7 +13,7 @@ from fedrit.settings import (
     HOST, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
-from .utils import SLIT, gen_token_str, logf
+from utils import SLIT, gen_token_str, logf
 from typing import *
 from django.contrib.auth.models import AbstractUser, Group, Permission
 import logging
@@ -55,7 +55,7 @@ class Platform(models.Model):
 
     def __str__(self):
         return f'<Platform {self.name}>'
-    
+
     def get_host():
         return goc_host()
 
@@ -108,7 +108,7 @@ class PlatformUser(AbstractUser):
         username = f'{username}@{platform.name}'
         user = cls(
             username=username,
-            origin_username=origin_username, 
+            origin_username=origin_username,
             platform=platform)
         user.set_password(password)
         user.save()
@@ -128,17 +128,17 @@ class UserToken(models.Model):
         Platform, default=goc_host, editable=False, on_delete=models.DO_NOTHING)
 
     user = models.OneToOneField(
-        PlatformUser, editable=False, on_delete=models.DO_NOTHING, 
+        PlatformUser, editable=False, on_delete=models.DO_NOTHING,
         related_name='usertoken')
-    
+
     # token_urlsafe(32) returns string w/ len 43
     token = models.CharField(
         max_length=47, default=gen_token_str)
-    
+
 
     def __repr__(self):
         return f'<UserToken user={self.user} platform={self.platform}>'
-    
+
     def __str__(self):
         return self.__repr__()
 

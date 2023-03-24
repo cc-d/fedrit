@@ -8,12 +8,12 @@ from rest_framework.serializers import (
     ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from .models import (
-    User, PlatformUser, Platform, 
+from models import (
+    User, PlatformUser, Platform,
     HOST, Community, Post, Comment,
     UserToken,
 )
-from .utils import (
+from utils import (
     valid_name, valid_url, valid_uuid, valid_username,
     def_kwargs, modchoice
 )
@@ -71,7 +71,7 @@ class PlatformUserSerializer(ModelSerializer):
 
         user = PlatformUser.create_user(
             username=username, password=password, return_token=return_token)
-        return user 
+        return user
 
 
 @ts_interface()
@@ -86,7 +86,7 @@ class CommunitySerializer(ModelSerializer):
             'id': {'required': False},
             'community_type': {'required': False},
             'name': {'required':False},
-            'created_at': {'read_only': True, 'required': False}, 
+            'created_at': {'read_only': True, 'required': False},
             'updated_at': {'read_only': True, 'required': False},
         }
 
@@ -122,9 +122,9 @@ class CommunitySerializer(ModelSerializer):
                 comm = Community.objects.filter(
                     community_type=ctype, name=cname).first()
                 if comm: return comm
-            else: 
+            else:
                 raise ValidationError('invalid community type')
-        else: 
+        else:
             raise ValidationError('commid or name required')
 
 
@@ -173,7 +173,7 @@ class PostSerializer(ModelSerializer):
 
         if len(title) > 255:
             raise ValidationError('title has 2 b shorter than 255')
-            
+
         if cname is None and cid is None:
             raise ValidationError('must have com id or name')
         else:
@@ -220,7 +220,7 @@ class CommentSerializer(ModelSerializer):
         except Exception as e:
             raise ValidationError(f'comm valid error {e}')
         return data
-    
+
 
 @ts_interface()
 class UserTokenSerializer(ModelSerializer):
@@ -262,7 +262,7 @@ def remove_serializer_suffix(ts_types_str: str):
 
     for p in patterns:
         # Replace the matching pattern with "export interface {type_name} {"
-        ts_types_str = re.sub(p, r'\1\2\3', ts_types_str)            
+        ts_types_str = re.sub(p, r'\1\2\3', ts_types_str)
     return ts_types_str
 
 
