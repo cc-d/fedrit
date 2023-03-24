@@ -1,14 +1,20 @@
 import re
 import string
 from typing import *
-from .models import (
-    Platform, PlatformUser, Community, Post,
-    UserToken,
-)
 from fedrit.settings import (
     VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS
 )
 from secrets import token_urlsafe
+
+
+class SLIT:
+    """ used for typehints """
+    platformuser = 'api.models.PlatformUser'
+    platform = 'api.models.Platform'
+    post = 'api.models.Post'
+    comment = 'api.models.Comment'
+    usertoken = 'api.models.UserToken'
+    token = 'api.models.Token'
 
 
 def valid_uuid(string):

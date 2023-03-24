@@ -13,8 +13,8 @@ from fedrit.settings import (
     HOST_PLATFORM, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
-from dbutils import gen_token_str
-
+from .utils import SLIT, gen_token_str
+from typing import *
 import logging
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class PlatformUser(AbstractUser):
 
 
     @classmethod
-    def create_user(cls, username, password, return_token=False):
+    def create_user(cls, username, password, return_token=False) -> SLIT.platformuser:
         """ creates new PlatformUser assumes validated in serializer """
         if not username or not password:
             raise ValueError('Missing username, password')
@@ -97,21 +97,54 @@ class PlatformUser(AbstractUser):
         user.set_password(password)
         user.save()
 
+        ptoken = UserToken.gen_user_token(user=user, platform=platform)
+        logger.info(f'created plattoken for user {user} {platform}: {ptoken}')
+
+        user.save()
+
         utoken = Token.objects.create(user=user)
         if return_token:
             return (user, utoken)
         return (user,)
-    
+
 
 class UserToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     platform = models.OneToOneField(
         Platform, default=host_platform, editable=False, on_delete=models.DO_NOTHING)
+
+    user = models.OneToOneField(
+        PlatformUser, editable=False, on_delete=models.DO_NOTHING, 
+        related_name='usertoken')
+    
     # token_urlsafe(32) returns string w/ len 43
     token = models.CharField(
         max_length=47, null=False, default=gen_token_str)
-    user = models.OneToOneField(
-        PlatformUser, editable=False, on_delete=models.DO_NOTHING)
+    
+
+    def __repr__(self):
+        return f'<UserToken user={self.user} platform={self.platform}>'
+    
+    def __str__(self):
+        return self.__repr__()
+
+
+    @staticmethod
+    def gen_user_token(
+        cls,
+        user: Optional[SLIT.platformuser] = None,
+        platform: Optional[SLIT.platform] = None
+    ) -> SLIT.usertoken:
+        """_summary_
+        Args:
+            user (Optional[PlatformUser], optional): _description_. Defaults to None.
+            platform (Optional[Platform], optional): _description_. Defaults to None.
+        Returns:
+            UserToken: _description_
+        """
+        obj = cls(user=user, platform=platform)
+        obj.save()
+        return obj
 
 
 class Community(models.Model):

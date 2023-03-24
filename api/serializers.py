@@ -8,12 +8,12 @@ from rest_framework.serializers import (
     ModelSerializer, CharField, ValidationError)
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from models import (
+from .models import (
     User, PlatformUser, Platform, 
     host_platform, Community, Post, Comment,
     UserToken,
 )
-from utils import (
+from .utils import (
     valid_name, valid_url, valid_uuid, valid_username,
     def_kwargs, modchoice
 )
@@ -77,7 +77,7 @@ class PlatformUserSerializer(ModelSerializer):
 
 @ts_interface()
 class CommunitySerializer(ModelSerializer):
-    platform = PlatformSerializer
+    platform = PlatformSerializer()
 
     class Meta:
         model = Community
@@ -142,9 +142,9 @@ class CommunitySerializer(ModelSerializer):
 
 @ts_interface()
 class PostSerializer(ModelSerializer):
-    author = PlatformUserSerializer
-    community = CommunitySerializer
-    platform = PlatformSerializer
+    author = PlatformUserSerializer()
+    community = CommunitySerializer()
+    platform = PlatformSerializer()
 
     class Meta:
         model = Post
@@ -189,7 +189,7 @@ class PostSerializer(ModelSerializer):
 
 @ts_interface()
 class CommentSerializer(ModelSerializer):
-    post = PostSerializer
+    post = PostSerializer()
 
     class Meta:
         model = Comment
@@ -225,13 +225,32 @@ class CommentSerializer(ModelSerializer):
 
 @ts_interface()
 class UserTokenSerializer(ModelSerializer):
-    user = PlatformUserSerializer
-    platform = PlatformSerializer
+    user = PlatformUserSerializer()
+    platform = PlatformSerializer()
 
     class Meta:
         model = UserToken
         fields = ['user', 'platform', 'token']
         read_only_fields = ['token']
+
+
+    def validate(self, data):
+        platid = self.context.get('platform_id', None)
+        userid = self.context.get('user_id', None)
+
+        if platid is None:
+            plat = host_platform()
+        else:
+            plat = Platform.objects.get(pk=platid)
+
+        if userid is None:
+            raise ValidationError('no user id')
+        else:
+            user = PlatformUser.objects.get(pk=userid)
+
+        data['user'] = user
+        data['platform'] = plat
+        return data
 
 
 # Autogen
