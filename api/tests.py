@@ -3,12 +3,17 @@ from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase
 from .utils import (
- valid_uuid, valid_name, valid_username, valid_url, gen_token_str, valid_token_str
+ valid_uuid, valid_name, valid_username, 
+ valid_url, gen_token_str, valid_token_str,
+ pal,
 )
 from .serializers import PlatformUserSerializer, PlatformSerializer, UserTokenSerializer
 from .models import (
     PlatformUser, Platform, UserToken, host_platform
 )
+import logging
+
+lgr = logging.getLogger(__name__)
 
 
 class TestUtils(TestCase):
@@ -79,7 +84,10 @@ class TestUtils(TestCase):
         self.assertEqual(len(ptoken), 47)
 
         self.assertTrue(valid_token_str(ptoken))
+
+        pal(ptoken + 'l')
         self.assertFalse(valid_token_str(ptoken + 'l'))
+
         self.assertFalse(valid_token_str(ptoken[1:]))
         self.assertFalse(valid_token_str(ptoken[:-1]))
 
@@ -102,7 +110,7 @@ class TestModels(TestCase):
     def test_platform_user_creation(self):
         self.assertIsNotNone(self.platform_user)
         self.assertEqual(self.platform_user.username,
-                         'testplatformuser@{}'.format(host_platform().name))
+                         'testplatformuser@{}'.format(Platform.get_or_create_host().name))
 
     def test_platform_creation(self):
         self.assertIsNotNone(self.platform)
@@ -133,7 +141,7 @@ class TestSerializers(APITestCase):
         serializer = PlatformUserSerializer(self.platform_user)
         self.assertIsNotNone(serializer)
         self.assertEqual(
-            serializer.data['username'], 'testplatformuser@{}'.format(host_platform().name))
+            serializer.data['username'], 'testplatformuser@{}'.format(Platform.get_or_create_host().name))
 
     def test_platform_serializer(self):
         serializer = PlatformSerializer(self.platform)
@@ -144,7 +152,7 @@ class TestSerializers(APITestCase):
         serializer = UserTokenSerializer(self.user_token)
         self.assertIsNotNone(serializer)
         self.assertEqual(serializer.data['user']['username'],
-                         'testplatformuser@{}'.format(host_platform().name))
+                         'testplatformuser@{}'.format(Platform.get_or_create_host().name))
         self.assertEqual(serializer.data['platform']['name'], 'Test Platform')
 
     def tearDown(self):

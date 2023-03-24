@@ -13,7 +13,8 @@ from fedrit.settings import (
 from secrets import token_urlsafe
 
 lflogger = logging.getLogger('logf')
-
+logger = logging.getLogger(__name__)
+    
 
 class SLIT:
     """ used for typehints """
@@ -63,6 +64,21 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
             return result
         return wrapper
     return decorator
+
+
+@logf(level='info')
+def pal(*args) -> str:
+    """enables log funcs to be used like print()
+
+    Returns:
+        str: str that was used in log msg
+    """
+    msg = ' '.join((str(a) for a in args))
+    print('PRINT PAL():', msg)
+    logger.debug(f'PAL() LOGGER: {msg}')
+    
+    return msg
+
 
 @logf()
 def valid_uuid(string):

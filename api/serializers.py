@@ -10,14 +10,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
     User, PlatformUser, Platform, 
-    host_platform, Community, Post, Comment,
+    HOST, Community, Post, Comment,
     UserToken,
 )
 from .utils import (
     valid_name, valid_url, valid_uuid, valid_username,
     def_kwargs, modchoice
 )
-from fedrit.settings import HOST_PLATFORM
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,9 +33,10 @@ class PlatformSerializer(ModelSerializer):
 class PlatformUserSerializer(ModelSerializer):
     token = CharField(allow_blank=True, read_only=True)
     platform = PlatformSerializer(read_only=True)
+    origin_username = CharField(allow_blank=False)
 
     class Meta:
-        model = get_user_model()
+        model = PlatformUser
         fields = (
             'id', 'platform', 'origin_username', 'created_at', 'updated_at',
             'username', 'password', 'token')
@@ -54,7 +54,7 @@ class PlatformUserSerializer(ModelSerializer):
         user_obj = None
         username = data.get('username', None)
         password = data.get('password', None)
-        data['platform'] = host_platform()
+        data['platform'] = Platform.get_or_create_host()
 
         if not username or not password:
             raise ValidationError('missing username or password')
@@ -97,7 +97,7 @@ class CommunitySerializer(ModelSerializer):
         ctype = data.get('community_type', None)
         cname = data.get('name', None)
 
-        data['platform'] = host_platform()
+        data['platform'] = Platform.get_or_create_host()
         if 'name' not in data:
             cname = self.context.get('community_name', None)
 
@@ -239,7 +239,7 @@ class UserTokenSerializer(ModelSerializer):
         userid = self.context.get('user_id', None)
 
         if platid is None:
-            plat = host_platform()
+            plat = Platform.get_or_create_host()
         else:
             plat = Platform.objects.get(pk=platid)
 

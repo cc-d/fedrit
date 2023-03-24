@@ -1,15 +1,16 @@
 export interface Platform {
     id?: string;
-    name: string;
-    domain: string;
+    name?: string;
+    domain?: string;
     createdAt?: string;
     updatedAt?: string;
+    host?: boolean;
 }
 
 export interface PlatformUser {
     id?: string;
     platform?: Platform;
-    originUsername?: string;
+    originUsername: string;
     createdAt?: string;
     updatedAt?: string;
     username: string;

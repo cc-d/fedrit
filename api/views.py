@@ -103,7 +103,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False)
     def all(self, request):
         comms = list(Community.objects \
-            .filter(platform=host_platform()) \
+            .filter(platform=Platform.get_or_create_host()) \
             .all())
         return Response([CommunitySerializer(c).data for c in comms])
 
@@ -135,7 +135,7 @@ class PostViewSet(viewsets.ModelViewSet):
             'community_id': request.data.get('community_id', None),
             'community_name': request.data.get('community_name', None),
             'author': request.user,
-            'platform': host_platform()
+            'platform': Platform.get_or_create_host()
         }
 
         serializer = self.get_serializer(data=request.data, context=context)
@@ -145,7 +145,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         newpost = Post.objects.create(
             title=vdata['title'], text=vdata['text'],
-            platform=host_platform(), community=vdata['community'],
+            platform=Platform.get_or_create_host(), community=vdata['community'],
             author=author)
         return Response(PostSerializer(newpost).data)
 

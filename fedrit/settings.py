@@ -14,12 +14,9 @@ import string
 from pathlib import Path
 
 ##### Custom Vars #####
-HOST_PLATFORM = {
-    'name': 'fedrit',
-    'domain': 'fedrit.com'
-}
-
-AUTH_USER_MODEL = 'api.PlatformUser'
+class HOST:
+    name = 'fedrit',
+    domain = 'fedrit.com'
 
 
 ##### LOGGING #####

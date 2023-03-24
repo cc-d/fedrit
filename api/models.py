@@ -10,11 +10,12 @@ from django.contrib.auth.models import (
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
 from fedrit.settings import (
-    HOST_PLATFORM, VALID_NAME_LEN_MAX, VALID_CHARS
+    HOST, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
-from .utils import SLIT, gen_token_str
+from .utils import SLIT, gen_token_str, logf
 from typing import *
+from django.contrib.auth.models import AbstractUser, Group, Permission
 import logging
 logger = logging.getLogger(__name__)
 
@@ -33,32 +34,30 @@ class PGPKey(models.Model):
 class Platform(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
-    name = models.CharField(max_length=VALID_NAME_LEN_MAX)
-    domain = models.CharField(max_length=255)
+    name = models.CharField(default=HOST.name, max_length=VALID_NAME_LEN_MAX)
+    domain = models.CharField(default=HOST.domain, max_length=255)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    host = models.BooleanField(default=False, null=False, editable=False)
 
     def __repr__(self):
         return f'<Platform {self.name} {self.id}>'
 
     def __str__(self):
         return f'<Platform {self.name}>'
+    
+    @classmethod
+    def get_or_create_host(cls) -> Tuple[SLIT.platform, bool]:
+        return Platform.objects \
+            .get_or_create(name=HOST.name, domain=HOST.domain, host=True)
 
 
 def host_platform() -> Platform:
-    print('hosterd platform')
-    host = Platform.objects \
-        .filter(name=HOST_PLATFORM['name']) \
-        .filter(domain=HOST_PLATFORM['domain']) \
-        .first()
-
-    if not host:
-        host = Platform.objects.create(
-            name=HOST_PLATFORM['name'],
-            domain=HOST_PLATFORM['domain'])
-    return host
-
+    plat, created = Platform.objects.get_or_create(host=True)
+    logger.debug(f'host_platform() plat={plat} created={created}')
+    return plat
 
 
 class PlatformUser(AbstractUser):
@@ -71,6 +70,14 @@ class PlatformUser(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Add these lines to override the groups and user_permissions fields
+    groups = models.ManyToManyField(
+        Group, related_name="platform_user_set", blank=True)
+    user_permissions = models.ManyToManyField(
+        Permission, related_name="platform_user_set", blank=True)
+
+    # ... the rest of your PlatformUser model
 
     def __repr__(self):
         return (f'<PlatformUser {self.username} {self.id}>')
@@ -85,7 +92,7 @@ class PlatformUser(AbstractUser):
         if not username or not password:
             raise ValueError('Missing username, password')
 
-        platform = host_platform()
+        platform = Platform.get_or_create_host()
         return_token = True if return_token else False
 
         origin_username = username
@@ -99,8 +106,6 @@ class PlatformUser(AbstractUser):
 
         ptoken = UserToken.gen_user_token(user=user, platform=platform)
         logger.info(f'created plattoken for user {user} {platform}: {ptoken}')
-
-        user.save()
 
         utoken = Token.objects.create(user=user)
         if return_token:
