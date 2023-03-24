@@ -1,4 +1,4 @@
-import axios from 'axios';
+import Axios, {AxiosResponse} from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlatformUser } from '../../types';
@@ -12,7 +12,7 @@ const NavBar: React.FC = () => {
 
   const handleLogout = async () => {
     await authAxios.post(`${API_URL}/auth/logout`)
-      .then((resp) => {
+      .then((resp: AxiosResponse<any>) => {
         setUser(null);
         localStorage.removeItem('token');
         window.location.href = `/`

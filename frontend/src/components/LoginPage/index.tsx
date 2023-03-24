@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import Axios from 'axios';
 import { API_URL, BASE_URL } from '../../config';
 import { PlatformUser } from '../../types';
 import { useNavigate } from 'react-router';
@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
     let fullUsername = action != 'register' 
       ? formUser.username + '@fedrit' : formUser.username
 
-    response = await axios.post(`${API_URL}/auth/${action}`, {
+    response = await Axios.post(`${API_URL}/auth/${action}`, {
       username: fullUsername,
       password: formUser.password
     }).then(response => {

@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import Axios from 'axios';
 import API_URL from './config';
 import { PlatformUser } from './types';
+import { AxiosResponse } from 'axios';
 
 export const AuthContext = createContext({});
 
@@ -19,10 +20,10 @@ const AuthProvider = (props: any) => {
     localStorage.getItem('dark') ? 'dark' : '')
 
   const fetchUser =  async(token: string) => {
-    const response =  await axios.post(`${API_URL}/tokenuser`, {
+    const response =  await Axios.post(`${API_URL}/tokenuser`, {
       'token': token,
-    }).then((response) => {
-      setUser(response.data);
+    }).then((resp: AxiosResponse<any>) => {
+      setUser(resp.data);
     }).catch((err) => {
       console.error(err);
     }).finally(() => {

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import Axios from 'axios';
 import { BASE_URL } from './config';
 
 const getAxConfig = (): object => {
@@ -11,7 +11,7 @@ const getAxConfig = (): object => {
   return retobj;
 }
 
-const authAxios = axios.create({
+const authAxios = Axios.create({
   headers: getAxConfig()
 });
 

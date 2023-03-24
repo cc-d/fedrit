@@ -52,6 +52,7 @@ export interface Comment {
 }
 
 export interface UserToken {
+    id?: string;
     user: PlatformUser;
     platform: Platform;
     token?: string;
