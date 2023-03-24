@@ -118,8 +118,8 @@ class PlatformUser(AbstractUser):
         utoken = Token.objects.create(user=user)
         logger.debug(f'get_or_create create_user utoken {utoken}')
 
-        ptoken = PlatUserToken.gen_user_token(user=user, platform=platform)
-        logger.info(f'created plattoken for user {user} {platform}: {ptoken}')
+        #ptoken = PlatUserToken.gen_user_token(user=user, platform=platform)
+        #logger.info(f'created plattoken for user {user} {platform}: {ptoken}')
 
 
         if return_token:

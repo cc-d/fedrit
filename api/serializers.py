@@ -58,7 +58,9 @@ class PlatformUserSerializer(ModelSerializer):
 
         if not username or not password:
             raise ValidationError('missing username or password')
-        else:
+
+        if '@' not in username:
+            logger.debug(f'no @ in username adding for {username}')
             username = f'{username}@{host.name}'
 
         if not valid_username(username):

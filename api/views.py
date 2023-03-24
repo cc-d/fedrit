@@ -44,12 +44,13 @@ class AuthViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def login(self, request):
+        print('AUTHAUTH', request.data)
         user = authenticate(
             username=request.data['username'],
             password=request.data['password'])
 
         if user:
-            token = Token.objects.get_or_create(user=user)[0]
+            token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
         else:
             return Response(
