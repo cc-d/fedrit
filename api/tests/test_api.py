@@ -7,9 +7,11 @@ from .utils import (
  valid_url, gen_token_str, valid_token_str,
  pal,
 )
-from .serializers import PlatformUserSerializer, PlatformSerializer, UserTokenSerializer
+from .serializers import (
+    PlatformUserSerializer, PlatformSerializer, UserTokenSerializer
+)
 from .models import (
-    PlatformUser, Platform, UserToken, host_platform
+    PlatformUser, Platform, UserToken
 )
 import logging
 
@@ -42,25 +44,17 @@ class TestUtils(TestCase):
         self.assertFalse(valid_name(longname))
         self.assertFalse(valid_name(empty))
         self.assertTrue(valid_name(digits))
-        self.assertTrue(valid_name(spchars))
+
+        self.assertFalse(valid_name(spchars))
+
         self.assertFalse(valid_name(spchars))
 
     def test_valid_username(self):
-        invalid = 'ExampleName'
-        valid = 'Example@Name'
-        longname = 'TOOLONG' * 50
-        empty = ''
-        digits = '123132123123123'
-        chars = 'aaaaaaaaaaaa'
-        spchars = 'äæ3áa6ãäæ3áa6ã'
+        invalids = ['username', 'user@', '@user', '@', ' @ ', '#@', '#@#', 'user name']
+        valids = ['u@u', 'username@platform', '1@1', 'u@1']
 
-        self.assertTrue(valid_username(valid))
-        self.assertFalse(valid_username(invalid))
-        self.assertFalse(valid_username(longname))
-        self.assertFalse(valid_username(empty))
-        self.assertTrue(valid_username(digits))
-        self.assertTrue(valid_username(spchars))
-        self.assertFalse(valid_username(spchars))
+        for iv in invalids: self.assertFalse(valid_username(iv))
+        for i in valids: self.assertTrue(valid_username(i))
 
 
     def test_valid_url(self):
@@ -70,6 +64,7 @@ class TestUtils(TestCase):
                    'http://example', 'https://example.', 'http://example./']
         
         for v in valids:
+            print(v, valids.index(v))
             self.assertTrue(valid_url(v))
 
         for iv in invalids:

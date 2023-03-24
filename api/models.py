@@ -31,6 +31,8 @@ class PGPKey(models.Model):
         return f'<PGPKey {self.fingerprint}>'
 
 
+
+
 class Platform(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -40,7 +42,13 @@ class Platform(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    host = models.BooleanField(default=False, null=False, editable=False)
+    host = models.BooleanField(default=False, editable=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['host'], condition=models.Q(
+                host=True), name='unique_host'),
+        ]
 
     def __repr__(self):
         return f'<Platform {self.name} {self.id}>'
@@ -48,16 +56,17 @@ class Platform(models.Model):
     def __str__(self):
         return f'<Platform {self.name}>'
     
-    @classmethod
-    def get_or_create_host(cls) -> Tuple[SLIT.platform, bool]:
-        return Platform.objects \
-            .get_or_create(name=HOST.name, domain=HOST.domain, host=True)
+    def get_host():
+        return goc_host()
 
 
-def host_platform() -> Platform:
-    plat, created = Platform.objects.get_or_create(host=True)
-    logger.debug(f'host_platform() plat={plat} created={created}')
-    return plat
+def goc_host(obj=False) -> str:
+    host, created = Platform.objects.get_or_create(host=True)
+    if created:
+        logger.info(f'host platform did not exist: {host} created')
+    if obj:
+        return host
+    return str(host.id)
 
 
 class PlatformUser(AbstractUser):
@@ -116,7 +125,7 @@ class PlatformUser(AbstractUser):
 class UserToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     platform = models.OneToOneField(
-        Platform, default=host_platform, editable=False, on_delete=models.DO_NOTHING)
+        Platform, default=goc_host, editable=False, on_delete=models.DO_NOTHING)
 
     user = models.OneToOneField(
         PlatformUser, editable=False, on_delete=models.DO_NOTHING, 
@@ -124,7 +133,7 @@ class UserToken(models.Model):
     
     # token_urlsafe(32) returns string w/ len 43
     token = models.CharField(
-        max_length=47, null=False, default=gen_token_str)
+        max_length=47, default=gen_token_str)
     
 
     def __repr__(self):
@@ -134,9 +143,7 @@ class UserToken(models.Model):
         return self.__repr__()
 
 
-    @staticmethod
     def gen_user_token(
-        cls,
         user: Optional[SLIT.platformuser] = None,
         platform: Optional[SLIT.platform] = None
     ) -> SLIT.usertoken:
@@ -147,9 +154,7 @@ class UserToken(models.Model):
         Returns:
             UserToken: _description_
         """
-        obj = cls(user=user, platform=platform)
-        obj.save()
-        return obj
+        return UserToken.objects.create(user=user, platform=platform)
 
 
 class Community(models.Model):
@@ -165,7 +170,7 @@ class Community(models.Model):
         max_length=20, choices=COMMUNITY_TYPES, default='SUB')
 
     platform = models.ForeignKey(
-        Platform, default=host_platform, on_delete=models.CASCADE)
+        Platform, default=goc_host, on_delete=models.CASCADE)
     name = models.CharField(max_length=VALID_NAME_LEN_MAX)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -195,7 +200,7 @@ class Post(models.Model):
     url = models.CharField(max_length=255, blank=True, default='')
     title = models.CharField(max_length=255)
     platform = models.ForeignKey(
-        Platform, default=host_platform, on_delete=models.DO_NOTHING)
+        Platform, default=goc_host, on_delete=models.DO_NOTHING)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -209,7 +214,7 @@ class Comment(models.Model):
     community = models.ForeignKey(Community, on_delete=models.DO_NOTHING)
     text = models.TextField(blank=True, default='')
     platform = models.ForeignKey(
-        Platform, default=host_platform, on_delete=models.DO_NOTHING)
+        Platform, default=goc_host, on_delete=models.DO_NOTHING)
     post = models.ForeignKey(
         Post, on_delete=models.DO_NOTHING)
 

@@ -33,7 +33,7 @@ class PlatformSerializer(ModelSerializer):
 class PlatformUserSerializer(ModelSerializer):
     token = CharField(allow_blank=True, read_only=True)
     platform = PlatformSerializer(read_only=True)
-    origin_username = CharField(allow_blank=False)
+    origin_username = CharField(allow_blank=True)
 
     class Meta:
         model = PlatformUser
@@ -42,7 +42,6 @@ class PlatformUserSerializer(ModelSerializer):
             'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
-            'platform': {'read_only': True},
             'id': {'required': False},
             'origin_username': {'required': False},
 
@@ -153,7 +152,7 @@ class PostSerializer(ModelSerializer):
         depth = 1
         extra_kwargs = {
             'id': {'required': False},
-            'platform': {'required': False, 'read_only': True},
+            'platform': {'required': False},
             'author': {'required': False},
             'community': {'required': False},
             'community_id': {'write_only': True, 'required': False},
@@ -198,7 +197,7 @@ class CommentSerializer(ModelSerializer):
         depth = 1
         extra_kwargs = {
             'id': {'required': False},
-            'platform': {'required': False, 'read_only': True},
+            'platform': {'required': False},
 
             'post': {'required': False},
             'post_id': {'required': False},
@@ -230,26 +229,20 @@ class UserTokenSerializer(ModelSerializer):
 
     class Meta:
         model = UserToken
-        fields = ['user', 'platform', 'token']
+        fields = ['id', 'user', 'platform', 'token']
         read_only_fields = ['token']
+        depth = 1
+        extra_kwargs = {
+            'id': {'required': False},
+            'platform': {'required': False},
+            'user': {'required': False},
+            'token': {'read_only': True, 'required': False}
+        }
 
 
     def validate(self, data):
-        platid = self.context.get('platform_id', None)
-        userid = self.context.get('user_id', None)
-
-        if platid is None:
-            plat = Platform.get_or_create_host()
-        else:
-            plat = Platform.objects.get(pk=platid)
-
-        if userid is None:
-            raise ValidationError('no user id')
-        else:
-            user = PlatformUser.objects.get(pk=userid)
-
-        data['user'] = user
-        data['platform'] = plat
+        data['platform'] = self.context.get('platform', None)
+        data['user'] = self.context.get('user', None)
         return data
 
 

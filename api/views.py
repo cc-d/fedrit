@@ -18,7 +18,7 @@ from rest_framework.permissions import (
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from .models import (
-    PlatformUser, Platform, Community, host_platform, Post,
+    PlatformUser, Platform, Community, Post,
     Comment, UserToken
 )
 from .serializers import (
@@ -173,7 +173,7 @@ class UserTokenViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def create_usertoken(self, request, **kwargs):
-        serializer = self.serializer_class(data=request.data, context=kwargs)
+        serializer = self.get_serializer(data=request.data, context=kwargs)
         serializer.is_valid(raise_exception=True)
         vdata = serializer.validated_data
 
@@ -181,5 +181,8 @@ class UserTokenViewSet(viewsets.ModelViewSet):
             .create(user=vdata['user'], platform=vdata['platform'])
         
         logger.debug(f'UserToken {ptoken} created')
+        return Response({
+
+        })
 
 

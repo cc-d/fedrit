@@ -8,7 +8,8 @@ import re
 import string
 from typing import *
 from fedrit.settings import (
-    VALID_CHARS, VALID_NAME_LEN_MAX, VALID_NAME_CHARS, logger
+    VALID_CHARS, VALID_NAME_LEN_MAX, 
+    VALID_NAME_CHARS, LOGLEVEL, LOGFLEVEL
 )
 from secrets import token_urlsafe
 
@@ -26,6 +27,25 @@ class SLIT:
     token = 'api.models.Token'
 
 
+# generate complete log level/log int mapping
+logtuple = (
+    (50, 'CRITICAL'),
+    (40, 'ERROR'),
+    (30, 'WARNING'),
+    (20, 'INFO'),
+    (10, 'DEBUG'),
+    (0, 'NOTSET'),
+)
+
+lmap = {}
+for lt in logtuple:
+    lint, lname = lt[0], lt[1]
+    lintstr, lnamelow = str(lint), lname.lower()
+
+    for k in [lint, lname, lintstr, lnamelow]:
+        lmap[k] = lt[0]
+
+
 T = TypeVar("T", bound=Callable[..., Any])
 
 def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
@@ -39,6 +59,7 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
     Returns:
         Callable[[T], T]: The wrapped function.
     """
+    
     def decorator(func: T) -> T:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -59,7 +80,7 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
                        f"| args={args} kwargs={kwargs}) >>>>> {result}")
 
             # Log the message using the specified level.
-            lflogger.log(level, message)
+            lflogger.log(LOGFLEVEL, message)
 
             return result
         return wrapper
@@ -136,7 +157,7 @@ def valid_url(url: str) -> bool:
         bool: if str is valid url
     """
     regex = re.compile(
-        r'^(?:http|ftp)s?://'  # http:// or https://
+        r'^((?:http|ftp)s?://)?'  # http:// or https://
         # domain...
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
         r'localhost|'  # localhost...
@@ -159,6 +180,9 @@ def valid_token_str(tokenstr: str) -> bool:
     Returns:
         bool: _description_
     """
+    if len(str(tokenstr)) != 47:
+        return False
+    
     rmatch = re.match(r'^(fdr-[a-zA-Z_\-0-9]+)', str(tokenstr))
     
     if rmatch is None:
