@@ -1,6 +1,6 @@
 # Fedrit
 
-Welcome to Fedrit, a web platform dedicated to fostering a more open, decentralized, and free internet. The aim of this project is to counteract the growing centralization of the internet and provide an alternative option to the major social media platforms that takes the role of the modern day public square, with a focus on the accountability and responsbility is required for any platform in such a position. The code is, and will always be, fully open source and easily deployable by anybody who wishes to operate their own platform/federation.
+This repository contains the code for Fedrit, a web platform dedicated to fostering a more open, decentralized, and free internet. The aim of this project is to counteract the growing centralization of the internet and provide an alternative option to the major social media platforms that takes the role of the modern day public square, with a focus on the accountability and responsbility is required for any platform in such a position. The code is, and will always be, fully open source and easily deployable by anybody who wishes to operate their own platform/federation.
 
 ## Philosophy and Objectives
 
