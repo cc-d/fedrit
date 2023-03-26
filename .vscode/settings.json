@@ -72,11 +72,11 @@
     "editor.folding": false,
     "editor.glyphMargin": false,
     "editor.lineNumbers": "on",
-    "editor.renderIndentGuides": false,
 
 "terminal.integrated.fontSize": 10,
 "terminal.integrated.lineHeight": 1.0,
 "terminal.integrated.scrollback": 1000,
+"editor.guides.indentation": false,
 
 
 }
