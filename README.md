@@ -33,9 +33,9 @@ I have tried to ensure the code quality is the best I can achieve. The backend i
 - Database: SQLite (can be easily replaced with other database systems)
 - API: Django REST Framework
 
-## Getting Started
+## Creating Your Own Platform
 
-To get started with Fedrit, follow these simple steps:
+To create a Platform instance, follow these steps:
 
 1. Clone the repository.
 2. Set up your development environment (Python, Node.js, etc.).
