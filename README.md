@@ -20,7 +20,7 @@ The goal of this project is to tackle the issues of accountability, centralizati
 - **Privacy and Internet Freedom:** Prioritize privacy and freedom, refraining from obtrusive advertising or data collection methods. Monetization will be ethical and secondary to the mission of making the internet a better place, focusing on options such as badges, awards, and easy-create-platform functionality.
 - **Federated Architecture:** Users can create, join, and interact with communities hosted on different instances of the Fedrit code, enabling cross-platform collaboration.
 - **Customizable Community Behavior:** Community creators can define the rules, appearance, and functionality of their communities, tailoring them to their specific needs and preferences.
-- **Ethical Monetization:** Focus on ethical monetization methods such as selling awards, badges, or other virtual goods, while prioritizing privacy and user experience.
+- **Ethical Monetization:** Focus on ethical monetization methods such as selling awards, badges, or other virtual goods, while prioritizing privacy and user experience, with an eventual goal of allowing community managers to monetize their communities (within the bounds allowed by each platorm)
 
 ## Code Architecture and Infrastructure
 
