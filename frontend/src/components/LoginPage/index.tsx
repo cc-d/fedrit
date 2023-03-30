@@ -1,7 +1,7 @@
 import React from 'react';
 import LoginForm from './LoginForm';
 import RegistrationForm from './RegistrationForm';
-import './LoginPage.css';
+import '../../styles/styles.css';
 
 const LoginPage: React.FC = () => {
   return (
