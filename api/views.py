@@ -10,6 +10,8 @@ from django_typomatic import ts_interface, get_ts, generate_ts
 from django.shortcuts import render
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from rest_framework import views, status, viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
@@ -19,6 +21,8 @@ from rest_framework.permissions import (
 )
 from rest_framework.decorators import action
 from rest_framework.views import APIView
+
+from fedrit.secrets import *
 from .models import (
     PlatformUser, Platform, Community, Post,
     Comment, PlatUserToken, goc_host
@@ -75,7 +79,35 @@ class AuthViewSet(viewsets.ModelViewSet):
         except IntegrityError as ie:
             return Response({'error':'user already exists'})
 
-        return Response({'user':PlatformUserSerializer(user).data, 'token':utoken.key})
+        return Response(
+            {'user':PlatformUserSerializer(user).data, 'token':utoken.key})
+
+    @action(methods=['POST'], detail=False)
+    @logf(level='info')
+    def google_register(self, request):
+        token = request.POST.get('id_token')
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token, requests.Request(), GOOGLE_CLIENT_ID)
+            if idinfo['iss'] not in ["accounts.google.com", "https://accounts.google.com"]:
+                raise ValueError('wrong issuer')
+
+            gsub = idinfo['sub']
+            gemail = idinfo['email']
+            gname = idinfo['name']
+
+            guser = PlatformUser.objects.filter(google_id=gsub).first()
+            if not guser:
+                guser = PlatformUser.objects \
+                    .create(email=gemail, name=gname, google_id=gsub)
+
+            return Response(
+                {"status": "success", "message": "User registered successfully"})
+        except ValueError as e:
+            return Response(
+                {'status': 'error', 'message': str(e)},
+                status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class TokenUserView(APIView):
@@ -182,7 +214,7 @@ class PlatUserTokenViewSet(viewsets.ModelViewSet):
     serializer_class = PlatUserTokenSerializer
 
     @action(methods=['POST'], detail=False)
-    def create_PlatUserToken(self, request, **kwargs):
+    def create_token(self, request, **kwargs):
         serializer = self.get_serializer(data=request.data, context=kwargs)
         serializer.is_valid(raise_exception=True)
         vdata = serializer.validated_data

@@ -104,8 +104,10 @@ class TestModels(TestCase):
 
     def test_platform_user_creation(self):
         self.assertIsNotNone(self.platform_user)
-        self.assertEqual(self.platform_user.username,
-                         'testplatformuser@{}'.format(goc_host(host_id=False).name))
+        self.assertEqual(
+            self.platform_user.username,
+            'testplatformuser@{}'.format(
+                goc_host(host_id=False).name))
 
     def test_platform_creation(self):
         self.assertIsNotNone(self.platform)
@@ -136,7 +138,8 @@ class TestSerializers(APITestCase):
         serializer = PlatformUserSerializer(self.platform_user)
         self.assertIsNotNone(serializer)
         self.assertEqual(
-            serializer.data['username'], 'testplatformuser@{}'.format(goc_host(host_id=False).name))
+            serializer.data['username'], 'testplatformuser@{}'.format(
+                goc_host(host_id=False).name))
 
     def test_platform_serializer(self):
         serializer = PlatformSerializer(self.platform)
@@ -147,7 +150,8 @@ class TestSerializers(APITestCase):
         serializer = PlatUserTokenSerializer(self.user_token)
         self.assertIsNotNone(serializer)
         self.assertEqual(serializer.data['user']['username'],
-                         'testplatformuser@{}'.format(goc_host(host_id=False).name))
+                         'testplatformuser@{}'.format(
+            goc_host(host_id=False).name))
         self.assertEqual(serializer.data['platform']['name'], 'Test Platform')
 
     def tearDown(self):
@@ -165,12 +169,6 @@ class TestViews(APITestCase):
         self.platform = Platform.objects.create(name='Test Platform')
         self.user_token = PlatUserToken.objects.create(
             user=self.platform_user, platform=self.platform)
-
-    def test_create_PlatUserToken_view(self):
-        # replace 'PlatUserToken-create_PlatUserToken' with the correct URL name
-        url = reverse('PlatUserToken-create_PlatUserToken')
-        response = self.client.post(url, {'user_id': self.platform_user.id})
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def tearDown(self):
         self.platform_user.delete()

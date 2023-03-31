@@ -86,7 +86,8 @@ class PlatformUser(AbstractUser):
     user_permissions = models.ManyToManyField(
         Permission, related_name="platform_user_set", blank=True)
 
-    # ... the rest of your PlatformUser model
+    # for google register/login
+    google_id = models.CharField(max_length=255, null=True, unique=True)
 
     def __repr__(self):
         return (f'<PlatformUser {self.username} {self.id}>')
