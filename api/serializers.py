@@ -16,8 +16,9 @@ from .models import (
 )
 from .utils import (
     valid_name, valid_url, valid_uuid, valid_username,
-    def_kwargs, modchoice
+    def_kwargs, modchoice, logf
 )
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class PlatformUserSerializer(ModelSerializer):
         }
         depth = 1
 
+    @logf()
     def validate(self, data):
         user_obj = None
         username = data.get('username', None)
@@ -70,6 +72,7 @@ class PlatformUserSerializer(ModelSerializer):
 
         return data
 
+    @logf()
     def create(self, validated_data, **kwargs):
         username = validated_data['username']
         password = validated_data['password']
@@ -96,6 +99,7 @@ class CommunitySerializer(ModelSerializer):
             'updated_at': {'read_only': True, 'required': False},
         }
 
+    @logf
     def validate(self, data):
         print('data',data,'context',self.context)
         cid = self.context.get('community_id', None)
@@ -105,9 +109,6 @@ class CommunitySerializer(ModelSerializer):
         data['platform'] = goc_host(host_id=False)
         if 'name' not in data:
             cname = self.context.get('community_name', None)
-
-        print('vvvv', self.context, data)
-
         if cid:
             try:
                 comm = Community.objects.get(pk=cid)
@@ -136,6 +137,7 @@ class CommunitySerializer(ModelSerializer):
 
         return data
 
+     @logf()
     def create(self, validated_data):
         name = validated_data['name']
         comtype = validated_data['community_type']
@@ -169,6 +171,7 @@ class PostSerializer(ModelSerializer):
             'updated_at': {'read_only': True, 'required': False},
         }
 
+    @logf()
     def validate(self, data):
         author = data.get('author')
         title = data.get('title', None)
@@ -216,6 +219,7 @@ class CommentSerializer(ModelSerializer):
             'updated_at': {'read_only': True, 'required': False},
         }
 
+    @logf()
     def validate(self, data):
         pid = self.context.get('post_id', None)
         try:
@@ -245,7 +249,7 @@ class PlatUserTokenSerializer(ModelSerializer):
             'token': {'read_only': True, 'required': False}
         }
 
-
+    @logf()
     def validate(self, data):
         data['platform'] = self.context.get('platform', None)
         data['user'] = self.context.get('user', None)

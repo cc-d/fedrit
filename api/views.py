@@ -41,6 +41,7 @@ class AuthViewSet(viewsets.ModelViewSet):
     queryset = PlatformUser.objects.all()
     serializer_class = PlatformUserSerializer
 
+    @logf()
     def get_permissions(self):
         if self.action in ['logout']:
             return [AllowAny()]
@@ -61,6 +62,7 @@ class AuthViewSet(viewsets.ModelViewSet):
                 {'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def logout(self, request):
         try:
             request.user.auth_token.delete()
@@ -69,6 +71,7 @@ class AuthViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def register(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -136,6 +139,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
     queryset = Community.objects.all()
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def create_community(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -143,6 +147,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
         return Response(CommunitySerializer(community).data)
 
     @action(methods=['GET'], detail=False)
+    @logf()
     def all(self, request):
         comms = list(Community.objects \
             .filter(platform=goc_host(host_id=False)) \
@@ -150,6 +155,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
         return Response([CommunitySerializer(c).data for c in comms])
 
     @action(methods=['GET'], detail=False)
+    @logf()
     def posts(self, request, *args, **kwargs):
         if 'name' in kwargs:
             kwargs['comm']
@@ -172,6 +178,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def create_post(self, request):
         context = {
             'community_id': request.data.get('community_id', None),
@@ -192,6 +199,7 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(PostSerializer(newpost).data)
 
     @action(methods=['GET'], detail=False)
+    @logf()
     def comments(self, request, **kwargs):
         print('ddddddd',request)
         serializer = CommentSerializer(data=request.data, context=kwargs)
@@ -203,6 +211,7 @@ class PostViewSet(viewsets.ModelViewSet):
         })
 
     @action(methods=['GET'], detail=False)
+    @logf()
     def all(self, request):
         posts = list(Post.objects.all())
         posts = [PostSerializer(p).data for p in posts]
@@ -214,6 +223,7 @@ class PlatUserTokenViewSet(viewsets.ModelViewSet):
     serializer_class = PlatUserTokenSerializer
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def create_token(self, request, **kwargs):
         serializer = self.get_serializer(data=request.data, context=kwargs)
         serializer.is_valid(raise_exception=True)

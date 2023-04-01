@@ -97,6 +97,7 @@ class PlatformUser(AbstractUser):
 
 
     @classmethod
+    @logf()
     def create_user(
         cls, username, password, return_token=False
     ):
@@ -148,7 +149,7 @@ class PlatUserToken(models.Model):
     def __str__(self):
         return self.__repr__()
 
-
+    @logf()
     def gen_user_token(
         user: Optional[SLIT.platformuser] = None,
         platform: Optional[SLIT.platform] = None
