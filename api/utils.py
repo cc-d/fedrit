@@ -12,6 +12,7 @@ from fedrit.settings import (
     VALID_NAME_CHARS, LOGLEVEL, LOGFLEVEL
 )
 from secrets import token_urlsafe
+from datetime import datetime as dtime
 
 lflogger = logging.getLogger('logf')
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ logtuple = (
     (0, 'NOTSET'),
 )
 
+# for ease of use
 lmap = {}
 for lt in logtuple:
     lint, lname = lt[0], lt[1]
@@ -47,6 +49,19 @@ for lt in logtuple:
 
 
 T = TypeVar("T", bound=Callable[..., Any])
+
+
+def get_asctime() -> str:
+    """Returns the current time in the same format as logging %(asctime)s
+
+
+    Returns:
+        str: current asctime
+    """
+    now = dtime.now()
+    return now.strftime(f"%Y-%m-%d %H:%M:%S")
+
+
 
 def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
     """
@@ -64,6 +79,9 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Start the timer and execute the function.
+            asctime = get_asctime()
+
+            argmsg = f'{asctime} {func.__name__}() args={args} kwargs={kwargs}'
             start_time = time.time()
             result = func(*args, **kwargs)
             end_time = time.time()
@@ -76,8 +94,7 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
             funcfname = os.path.basename(
                 inspect.getmodule(func).__file__)
 
-            message = (f"{extime:.4f} {func.__name__}() "
-                       f"{args} {kwargs} || {result}")
+            message = (f"{extime:.4f} {func.__name__}() return: {result}")
 
             # Log the message using the specified level.
             lflogger.log(lmap[level], message)

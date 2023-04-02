@@ -11,7 +11,7 @@ from django.contrib.auth.models import (
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
 from fedrit.settings import (
-    HOST, VALID_NAME_LEN_MAX, VALID_CHARS
+    HOSTINFO, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
 from .utils import SLIT, gen_token_str, logf
@@ -36,8 +36,8 @@ class PGPKey(models.Model):
 class Platform(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
-    name = models.CharField(default=HOST.name, max_length=VALID_NAME_LEN_MAX)
-    domain = models.CharField(default=HOST.domain, max_length=255)
+    name = models.CharField(default=HOSTINFO.name, max_length=VALID_NAME_LEN_MAX)
+    domain = models.CharField(default=HOSTINFO.domain, max_length=255)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -57,16 +57,29 @@ class Platform(models.Model):
         return f'<Platform {self.name}>'
 
 
+# initialize only once and then use this when Host is needed
+Host: Optional[Platform] = None
 
-def goc_host(host_id=True):
-    host, created = Platform.objects.get_or_create(host=True)
-    if created:
-        logger.info(f'host platform did not exist: {host} created')
 
-    if host_id:
-        return str(host.id)
-    return host
+@logf()
+def goc_host() -> SLIT.platform:
+    """goc_host returns the
 
+    Returns:
+        SLIT.platform: _description_
+    """
+    global Host
+    if Host is None:
+        host, created = Platform.objects.get_or_create(host=True)
+
+        if created:
+            logger.info(f'Host platform did not exist: {host} created')
+
+        Host = host
+    return Host
+
+
+Host = goc_host() # this way we can re-use instance from single query
 
 
 class PlatformUser(AbstractUser):
@@ -105,7 +118,7 @@ class PlatformUser(AbstractUser):
         if not username or not password:
             raise ValueError('Missing username, password')
 
-        platform = goc_host(host_id=False)
+        platform = goc_host(return_id=False)
         return_token = True if return_token else False
 
         origin_username = username.split('@')[0]

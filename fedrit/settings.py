@@ -14,7 +14,7 @@ import string
 from pathlib import Path
 
 ##### Custom Vars #####
-class HOST:
+class HOSTINFO:
     name = 'fedrit'
     domain = 'fedrit.com'
 
@@ -24,13 +24,13 @@ LOGLEVEL = logging.DEBUG
 LOGFLEVEL = logging.DEBUG
 logging.basicConfig(level=LOGLEVEL)
 
-LOGFORMAT = '%(asctime)s %(levelname)s %(filename)s:%(funcName)s:%(lineno)d | %(message)s'
-LFORMAT = '%(asctime)s %(levelname)s %(message)s'
+LOGFORMAT = '%(asctime)s [%(levelname)s %(filename)s %(funcName)s:%(lineno)d]: %(message)s'
+FORMATLOGF = '%(asctime)s [%(levelname)s]: %(message)s'
 
 lformat1 = logging.Formatter(LOGFORMAT)
 shandler1 = logging.StreamHandler()
 
-lformat2 = logging.Formatter(LFORMAT)
+lformat2 = logging.Formatter(FORMATLOGF)
 shandler2 = logging.StreamHandler()
 
 shandler1.setFormatter(lformat1)

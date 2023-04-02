@@ -22,9 +22,10 @@ const RegisterForm: React.FC = () => {
       username: regUser.username,
       password: regUser.password,
     })
-      .then((response) => {
+      .then((resp) => {
         // Redirect to login page upon successful registration
-        window.location.href = '/login';
+        localStorage.setItem('token', resp.data.token)
+        window.location.href = '/';
       })
       .catch((err) => {
         setError('Registration failed');

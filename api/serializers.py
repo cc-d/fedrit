@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
     PlatformUser, Platform,
-    HOST, Community, Post, Comment,
+    HOSTINFO, Community, Post, Comment,
     PlatUserToken, goc_host
 )
 from .utils import (
@@ -55,15 +55,21 @@ class PlatformUserSerializer(ModelSerializer):
         user_obj = None
         username = data.get('username', None)
         password = data.get('password', None)
-        host = goc_host(host_id=False)
-        data['platform'] = host
+        plat_id = data.get('platform_id', None)
 
         if not username or not password:
             raise ValidationError('missing username or password')
 
+        if plat_id is None:
+            plat = goc_host(return_id=False)
+        else:
+            plat = Platform.objects.get(pk=plat_id)
+
+        data['platform'] = plat
+
         if '@' not in username:
             logger.debug(f'no @ in username adding for {username}')
-            username = f'{username}@{host.name}'
+            username = f'{username}@{plat.domain}'
 
         if not valid_username(username):
             raise ValidationError('invalid username')
@@ -78,10 +84,8 @@ class PlatformUserSerializer(ModelSerializer):
         password = validated_data['password']
         return_token = kwargs.get('return_token', False)
 
-        user = PlatformUser.create_user(
+        return PlatformUser.create_user(
             username=username, password=password, return_token=return_token)
-        return user
-
 
 @ts_interface()
 class CommunitySerializer(ModelSerializer):
@@ -99,14 +103,14 @@ class CommunitySerializer(ModelSerializer):
             'updated_at': {'read_only': True, 'required': False},
         }
 
-    @logf
+    @logf()
     def validate(self, data):
         print('data',data,'context',self.context)
         cid = self.context.get('community_id', None)
         ctype = data.get('community_type', None)
         cname = data.get('name', None)
 
-        data['platform'] = goc_host(host_id=False)
+        data['platform'] = goc_host(return_id=False)
         if 'name' not in data:
             cname = self.context.get('community_name', None)
         if cid:
@@ -137,7 +141,7 @@ class CommunitySerializer(ModelSerializer):
 
         return data
 
-     @logf()
+    @logf()
     def create(self, validated_data):
         name = validated_data['name']
         comtype = validated_data['community_type']

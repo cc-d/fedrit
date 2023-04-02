@@ -107,7 +107,7 @@ class TestModels(TestCase):
         self.assertEqual(
             self.platform_user.username,
             'testplatformuser@{}'.format(
-                goc_host(host_id=False).name))
+                goc_host(return_id=False).name))
 
     def test_platform_creation(self):
         self.assertIsNotNone(self.platform)
@@ -139,7 +139,7 @@ class TestSerializers(APITestCase):
         self.assertIsNotNone(serializer)
         self.assertEqual(
             serializer.data['username'], 'testplatformuser@{}'.format(
-                goc_host(host_id=False).name))
+                goc_host(return_id=False).name))
 
     def test_platform_serializer(self):
         serializer = PlatformSerializer(self.platform)
@@ -151,7 +151,7 @@ class TestSerializers(APITestCase):
         self.assertIsNotNone(serializer)
         self.assertEqual(serializer.data['user']['username'],
                          'testplatformuser@{}'.format(
-            goc_host(host_id=False).name))
+            goc_host(return_id=False).name))
         self.assertEqual(serializer.data['platform']['name'], 'Test Platform')
 
     def tearDown(self):

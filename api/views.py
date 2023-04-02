@@ -48,8 +48,8 @@ class AuthViewSet(viewsets.ModelViewSet):
         return [AllowAny()]
 
     @action(methods=['POST'], detail=False)
+    @logf()
     def login(self, request):
-        print('AUTHAUTH', request.data)
         user = authenticate(
             username=request.data['username'],
             password=request.data['password'])
@@ -86,7 +86,7 @@ class AuthViewSet(viewsets.ModelViewSet):
             {'user':PlatformUserSerializer(user).data, 'token':utoken.key})
 
     @action(methods=['POST'], detail=False)
-    @logf(level='info')
+    @logf()
     def google_register(self, request):
         token = request.POST.get('id_token')
         try:
@@ -150,7 +150,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
     @logf()
     def all(self, request):
         comms = list(Community.objects \
-            .filter(platform=goc_host(host_id=False)) \
+            .filter(platform=goc_host(return_id=False)) \
             .all())
         return Response([CommunitySerializer(c).data for c in comms])
 
@@ -184,7 +184,7 @@ class PostViewSet(viewsets.ModelViewSet):
             'community_id': request.data.get('community_id', None),
             'community_name': request.data.get('community_name', None),
             'author': request.user,
-            'platform': goc_host(host_id=False)
+            'platform': goc_host(return_id=False)
         }
 
         serializer = self.get_serializer(data=request.data, context=context)
@@ -194,7 +194,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         newpost = Post.objects.create(
             title=vdata['title'], text=vdata['text'],
-            platform=goc_host(host_id=False), community=vdata['community'],
+            platform=goc_host(return_id=False), community=vdata['community'],
             author=author)
         return Response(PostSerializer(newpost).data)
 
