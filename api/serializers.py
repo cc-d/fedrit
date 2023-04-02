@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from .models import (
     PlatformUser, Platform,
-    HOSTINFO, Community, Post, Comment,
+    HOSTCONF, Community, Post, Comment,
     PlatUserToken, goc_host
 )
 from .utils import (
@@ -64,7 +64,6 @@ class PlatformUserSerializer(ModelSerializer):
             plat = goc_host(return_id=False)
         else:
             plat = Platform.objects.get(pk=plat_id)
-
         data['platform'] = plat
 
         if '@' not in username:

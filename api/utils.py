@@ -81,7 +81,9 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
             # Start the timer and execute the function.
             asctime = get_asctime()
 
-            argmsg = f'{asctime} {func.__name__}() args={args} kwargs={kwargs}'
+            argmsg = f'{func.__name__}() args={args} kwargs={kwargs}'
+            lflogger.log(lmap[level], argmsg)
+
             start_time = time.time()
             result = func(*args, **kwargs)
             end_time = time.time()
@@ -94,7 +96,7 @@ def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
             funcfname = os.path.basename(
                 inspect.getmodule(func).__file__)
 
-            message = (f"{extime:.4f} {func.__name__}() return: {result}")
+            message = (f"[{get_asctime()} {func.__name__}() -> {result}")
 
             # Log the message using the specified level.
             lflogger.log(lmap[level], message)
