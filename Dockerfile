@@ -44,6 +44,7 @@ RUN apt-get install -y \
     wget \
     xz-utils \
     zlib1g-dev \
+    python3-dev \
     python3-venv
 
 # Install pyenv and set up the environment
@@ -68,7 +69,7 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | b
     . "$NVM_DIR/nvm.sh" && \
     nvm install $NODE_VERSION && \
     nvm alias default $NODE_VERSION && \
-    nvm use default
+    nvm use $NODE_VERSION
 
 
 # Clone the repository
