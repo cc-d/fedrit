@@ -22,7 +22,7 @@ from rest_framework.permissions import (
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 
-from fedrit.secrets import *
+#from ..fedrit.secrets import *
 from .models import (
     PlatformUser, Platform, Community, Post,
     Comment, PlatUserToken, goc_host

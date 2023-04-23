@@ -2,8 +2,8 @@
 FROM ubuntu:22.04 as build
 
 # python/npm versions to use latest versions of
-ARG PV="3.10"
-ARG NV="16.14"
+ARG PY_VERSION="3.10"
+ARG NODE_VERSION="16.14"
 
 # Set environment variable for the app directory
 ENV APP_DIR /app
@@ -15,8 +15,13 @@ RUN mkdir $APP_DIR
 WORKDIR $APP_DIR
 
 # Update the package lists and upgrade the system
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Chicago
+
 RUN apt-get update && \
-    apt-get upgrade -y
+    apt-get install -y --no-install-recommends tzdata && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 # Install dependencies
 RUN apt-get install -y \
@@ -38,29 +43,33 @@ RUN apt-get install -y \
     tk-dev \
     wget \
     xz-utils \
-    zlib1g-dev
+    zlib1g-dev \
+    python3-venv
 
-# Install pyenv
-RUN curl https://pyenv.run | bash
+# Install pyenv and set up the environment
+RUN curl https://pyenv.run | bash && \
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc && \
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc && \
+    export PYENV_ROOT="$HOME/.pyenv" && \
+    export PATH="$PYENV_ROOT/bin:$PATH" && \
+    eval "$(pyenv init -)" && \
+    pyenv install $PY_VERSION && \
+    pyenv global $PY_VERSION && \
+    pyenv local $PY_VERSION
 
-# Set up pyenv environment variables
-ENV PYENV_ROOT /root/.pyenv
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-
-# Install latest Python version using pyenv
-RUN pyenv install $(pyenv install $PV | grep -v - | grep -v b | tail -1) && \
-    pyenv global $PV
+ENV PYENV_ROOT="$HOME/.pyenv"
+ENV PATH="$PYENV_ROOT/bin:$PATH"
 
 # Install nvm and latest Node.js version
-ENV NVM_DIR /root/.nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
-    . $NVM_DIR/nvm.sh && \
-    nvm install $NV && \
-    nvm use $NV
+    echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc && \
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc && \
+    export NVM_DIR="$HOME/.nvm" && \
+    . "$NVM_DIR/nvm.sh" && \
+    nvm install $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    nvm use default
 
-# Set up nvm environment variables
-ENV NODE_PATH $NVM_DIR/versions/node/$(nvm current)/lib/node_modules
-ENV PATH $NVM_DIR/versions/node/$(nvm current)/bin:$PATH
 
 # Clone the repository
 ARG GITURL=https://github.com/cc-d/fedrit.git
@@ -73,13 +82,14 @@ WORKDIR fedrit/
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Set up Python virtual environment and install dependencies
-RUN python -m venv venv && \
+RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Run Django migrations
-RUN python manage.py makemigrations && \
+RUN . venv/bin/activate && \
+    python manage.py makemigrations && \
     python manage.py migrate
 
 # Install frontend dependencies
@@ -107,4 +117,3 @@ RUN apt-get update && \
 EXPOSE 8000
 EXPOSE 3000
 EXPOSE 80
-
