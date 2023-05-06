@@ -1,0 +1,9 @@
+FROM node:16
+
+WORKDIR /frontend
+
+COPY frontend/ .
+
+RUN npm ci
+
+CMD ["npm", "start"]

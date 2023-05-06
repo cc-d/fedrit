@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile-django
+    command: ["gunicorn", "--bind", "0.0.0.0:8000", "fedrit.wsgi:application"]
+    volumes:
+      - .:/fedrit
+      - data:/fedrit/db
+    ports:
+      - "8000:8000"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - .:/fedrit
+    depends_on:
+      - django
+      - react
+
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile-react
+    volumes:
+      - ./frontend:/fedrit/frontend
+    depends_on:
+      - django
+    ports:
+      - "3000:3000"
+
+volumes:
+  data:
