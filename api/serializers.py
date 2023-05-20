@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 @ts_interface()
 class PlatformSerializer(ModelSerializer):
-    uuid = CharField(read_only=True)
     class Meta:
         model = Platform
         fields = '__all__'
+        depth = 1
 
 
 @ts_interface()
@@ -45,6 +45,7 @@ class PlatformUserSerializer(ModelSerializer):
             'password': {'write_only': True, 'required': False},
             'id': {'required': False},
             'plat_username': {'required': False},
+            'username': {'required': False},
             'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
         }
         depth = 1
@@ -56,7 +57,7 @@ class PlatformUserSerializer(ModelSerializer):
         password = data.get('password', None)
         plat_id = data.get('platform_id', None)
 
-        platform = goc_host()
+        platform = goc_host(id=False)
 
         data['platform'] = platform
         data['username'] = f'{plat_username}@{platform.url}'

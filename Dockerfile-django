@@ -6,6 +6,7 @@ WORKDIR $APP_DIR
 
 COPY requirements.txt $APP_DIR
 RUN pip install -r requirements.txt
+RUN pip install myfuncs --upgrade
 
 COPY . $APP_DIR
 

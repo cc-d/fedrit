@@ -50,12 +50,15 @@ class Platform(models.Model):
                 is_host=True), name='unique_host'),
         ]
 
+
     def __repr__(self):
-        return f'<Platform {str(self.id)[:5]}... {self.url}>'
+        return f'<Platform {trunc_str(str(self.id), 5)} {self.url}>'
 
 @logf()
-def goc_host() -> Platform:
+def goc_host(id=True) -> Platform:
     plat, created = Platform.objects.get_or_create(url='localhost', is_host=True)
+    if id:
+        return plat.id
     return plat
 
 
