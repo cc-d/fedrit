@@ -4,21 +4,21 @@ import { API_URL } from '../../config';
 import '../../styles/styles.css';
 
 interface LoginFormInputs {
-  username: string;
+  plat_username: string;
   password: string;
 }
 
 const LoginForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [logUser, setLogUser] = useState<LoginFormInputs>({
-    'username': '', 'password': '',
+    'plat_username': '', 'password': '',
   });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const resp = await Axios.post(`${API_URL}/auth/login`, {
-      username: logUser.username + '@fedrit',
+      plat_username: logUser.plat_username + '@fedrit',
       password: logUser.password,
     }).then(resp => {
       localStorage.setItem('token', resp.data.token);
@@ -33,11 +33,11 @@ const LoginForm: React.FC = () => {
       <h2>Login</h2>
       <form id='form-login' onSubmit={handleSubmit}>
         <input
-          id='input-login-username'
+          id='input-login-plat_username'
           type='text'
           placeholder='Username'
-          value={logUser.username}
-          onChange={e => setLogUser({ ...logUser, username: e.target.value })}
+          value={logUser.plat_username}
+          onChange={e => setLogUser({ ...logUser, plat_username: e.target.value })}
         />
         <input
           id='input-login-password'

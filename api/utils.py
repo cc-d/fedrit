@@ -7,11 +7,11 @@ import logging
 import re
 import string
 from typing import *
+from myfuncs import *
 from fedrit.settings import (
     VALID_CHARS, VALID_NAME_LEN_MAX,
     VALID_NAME_CHARS, LOGLEVEL, LOGFLEVEL
 )
-from secrets import token_urlsafe
 from datetime import datetime as dtime
 
 lflogger = logging.getLogger('logf')
@@ -28,82 +28,6 @@ class SLIT:
     token = 'api.models.Token'
 
 
-# generate complete log level/log int mapping
-logtuple = (
-    (50, 'CRITICAL'),
-    (40, 'ERROR'),
-    (30, 'WARNING'),
-    (20, 'INFO'),
-    (10, 'DEBUG'),
-    (0, 'NOTSET'),
-)
-
-# for ease of use
-lmap = {}
-for lt in logtuple:
-    lint, lname = lt[0], lt[1]
-    lintstr, lnamelow = str(lint), lname.lower()
-
-    for k in [lint, lname, lintstr, lnamelow]:
-        lmap[k] = lt[0]
-
-
-T = TypeVar("T", bound=Callable[..., Any])
-
-
-def get_asctime() -> str:
-    """Returns the current time in the same format as logging %(asctime)s
-
-
-    Returns:
-        str: current asctime
-    """
-    now = dtime.now()
-    return now.strftime(f"%Y-%m-%d %H:%M:%S")
-
-
-
-def logf(level: Optional[int] = logging.DEBUG) -> Callable[[T], T]:
-    """
-    A decorator that logs the execution time, function name, arguments, keyword arguments,
-    and return value of a function using a specified log level.
-
-    Args:
-        level (int, optional): The log level to use for logging. Defaults to logging.DEBUG.
-
-    Returns:
-        Callable[[T], T]: The wrapped function.
-    """
-
-    def decorator(func: T) -> T:
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Start the timer and execute the function.
-            asctime = get_asctime()
-
-            argmsg = f'{func.__name__}() args={args} kwargs={kwargs}'
-            lflogger.log(lmap[level], argmsg)
-
-            start_time = time.time()
-            result = func(*args, **kwargs)
-            end_time = time.time()
-
-            frame = inspect.getframeinfo(inspect.currentframe().f_back)
-            lineno = frame.lineno
-
-            # Calculate the execution time and format the log message.
-            extime = end_time - start_time
-            funcfname = os.path.basename(
-                inspect.getmodule(func).__file__)
-
-            message = (f"[{get_asctime()} {func.__name__}() -> {result}")
-
-            # Log the message using the specified level.
-            lflogger.log(lmap[level], message)
-
-            return result
-        return wrapper
-    return decorator
 
 
 @logf(level='info')
@@ -118,13 +42,6 @@ def pal(*args) -> str:
     logger.debug(f'PAL() LOGGER: {msg}')
 
     return msg
-
-
-@logf()
-def valid_uuid(string):
-    regex = re.compile(
-        r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$')
-    return bool(regex.match(string))
 
 @logf()
 def valid_name(vstr: str, add_chars: str = '') -> bool:
@@ -187,7 +104,7 @@ def valid_url(url: str) -> bool:
 
 @logf()
 def gen_token_str() -> str:
-    return f'fdr-{token_urlsafe(32)}'
+    return f'fdr-{ran_str(32)}'
 
 @logf()
 def valid_token_str(tokenstr: str) -> bool:
@@ -220,7 +137,6 @@ def def_kwargs(*args, **kwargs) -> dict:
     dk['id'] = {'required': False}
     dk['created_at'] = {'read_only': True},
     dk['updated_at'] = {'read_only': True}
-    print('dk', dk)
     return dk
 
 @logf()

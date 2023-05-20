@@ -8,13 +8,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import (
     AbstractUser, Group, Permission,
 )
+from myfuncs import *
 from django_typomatic import ts_interface, get_ts, generate_ts
 from django.utils import timezone
 from fedrit.settings import (
     HOSTCONF, VALID_NAME_LEN_MAX, VALID_CHARS
 )
 from rest_framework.authtoken.models import Token
-from .utils import SLIT, gen_token_str, logf
+from api.utils import SLIT, gen_token_str
 from typing import *
 import logging
 logger = logging.getLogger(__name__)
@@ -36,49 +37,26 @@ class PGPKey(models.Model):
 class Platform(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
-    name = models.CharField(default=HOSTCONF.name, max_length=VALID_NAME_LEN_MAX)
-    domain = models.CharField(default=HOSTCONF.domain, max_length=255)
+    url = models.CharField(max_length=255, default='localhost', unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    host = models.BooleanField(default=False, editable=False)
+    is_host = models.BooleanField(default=False, editable=False)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['host'], condition=models.Q(
-                host=True), name='unique_host'),
+            models.UniqueConstraint(fields=['is_host'], condition=models.Q(
+                is_host=True), name='unique_host'),
         ]
 
     def __repr__(self):
-        return f'<Platform {self.name} {self.id}>'
+        return f'<Platform {str(self.id)[:5]}... {self.url}>'
 
-    def __str__(self):
-        return f'<Platform {self.name}>'
-
-
-# initialize only once and then use this when HOST is needed
-HOST: Optional[SLIT.platform] = None
-
-
-def goc_host(return_id: bool = True) -> Platform:
-    """Returns the current host platform, creates if it doesn't exist.
-
-    Returns:
-        SLIT.platform: _description_
-    """
-    global HOST
-    if HOST is None:
-        host, created = Platform.objects.get_or_create(host=True)
-
-        if created:
-            logger.info(f'Host platform did not exist: {HOST} created')
-
-        HOST = host
-
-    if return_id:
-        return HOST.id
-    return HOST
+@logf()
+def goc_host() -> Platform:
+    plat, created = Platform.objects.get_or_create(url='localhost', is_host=True)
+    return plat
 
 
 class PlatformUser(AbstractUser):
@@ -86,8 +64,7 @@ class PlatformUser(AbstractUser):
 
     # original platform attributes
     platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
-
-    origin_username = models.CharField(max_length=VALID_NAME_LEN_MAX)
+    plat_username = models.CharField(max_length=255, default='username')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -111,20 +88,18 @@ class PlatformUser(AbstractUser):
     @classmethod
     @logf()
     def create_user(
-        cls, username, password, return_token=False
+        cls, plat_username, username, password, platform,
+        return_token=False
     ):
         """ creates new PlatformUser assumes validated in serializer """
         if not username or not password:
             raise ValueError('Missing username, password')
 
-        platform = goc_host(return_id=False)
         return_token = True if return_token else False
 
-        origin_username = username.split('@')[0]
-
         user = cls(
+            plat_username = plat_username,
             username=username,
-            origin_username=origin_username,
             platform=platform)
         user.set_password(password)
         user.save()

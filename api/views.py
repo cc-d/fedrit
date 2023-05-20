@@ -22,16 +22,15 @@ from rest_framework.permissions import (
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 
-#from ..fedrit.secrets import *
-from .models import (
+from api.models import (
     PlatformUser, Platform, Community, Post,
     Comment, PlatUserToken, goc_host
 )
-from .serializers import (
+from api.serializers import (
     PlatformUserSerializer, CommunitySerializer, PostSerializer,
     CommentSerializer, PlatUserTokenSerializer,
 )
-from .utils import logf
+from api.utils import logf
 
 import logging
 logger = logging.getLogger(__name__)

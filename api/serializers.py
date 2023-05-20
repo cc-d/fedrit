@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 @ts_interface()
 class PlatformSerializer(ModelSerializer):
+    uuid = CharField(read_only=True)
     class Meta:
         model = Platform
         fields = '__all__'
-        depth = 1
 
 
 @ts_interface()
@@ -39,13 +39,12 @@ class PlatformUserSerializer(ModelSerializer):
     class Meta:
         model = PlatformUser
         fields = (
-            'id', 'platform', 'origin_username', 'created_at', 'updated_at',
+            'id', 'platform', 'plat_username', 'created_at', 'updated_at',
             'username', 'password', 'token')
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'id': {'required': False},
-            'origin_username': {'required': False},
-
+            'plat_username': {'required': False},
             'created_at': {'read_only': True}, 'updated_at': {'read_only': True},
         }
         depth = 1
@@ -53,24 +52,16 @@ class PlatformUserSerializer(ModelSerializer):
     @logf()
     def validate(self, data):
         user_obj = None
-        username = data.get('username', None)
+        plat_username = data.get('plat_username', None)
         password = data.get('password', None)
         plat_id = data.get('platform_id', None)
 
-        if not username or not password:
-            raise ValidationError('missing username or password')
+        platform = goc_host()
 
-        if plat_id is None:
-            plat = goc_host(return_id=False)
-        else:
-            plat = Platform.objects.get(pk=plat_id)
-        data['platform'] = plat
+        data['platform'] = platform
+        data['username'] = f'{plat_username}@{platform.url}'
 
-        if '@' not in username:
-            logger.debug(f'no @ in username adding for {username}')
-            username = f'{username}@{plat.domain}'
-
-        if not valid_username(username):
+        if not valid_username(data['username']):
             raise ValidationError('invalid username')
         elif password is not None and len(str(password)) < 8:
             raise ValidationError('password too short')
@@ -79,12 +70,15 @@ class PlatformUserSerializer(ModelSerializer):
 
     @logf()
     def create(self, validated_data, **kwargs):
-        username = validated_data['username']
+        plat_username = validated_data['plat_username']
         password = validated_data['password']
+        username = validated_data['username']
+        platform = validated_data['platform']
         return_token = kwargs.get('return_token', False)
 
         return PlatformUser.create_user(
-            username=username, password=password, return_token=return_token)
+            plat_username=plat_username, username=username,
+            password=password, platform=platform, return_token=return_token)
 
 @ts_interface()
 class CommunitySerializer(ModelSerializer):
@@ -109,7 +103,7 @@ class CommunitySerializer(ModelSerializer):
         ctype = data.get('community_type', None)
         cname = data.get('name', None)
 
-        data['platform'] = goc_host(return_id=False)
+        data['platform'] = goc_host()
         if 'name' not in data:
             cname = self.context.get('community_name', None)
         if cid:

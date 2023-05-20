@@ -47,4 +47,8 @@ tzdata==2022.7
 urllib3==1.26.15
 Werkzeug==2.2.2
 
+
+myfuncs
+
+
 gunicorn

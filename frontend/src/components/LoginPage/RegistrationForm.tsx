@@ -4,13 +4,13 @@ import { API_URL } from '../../config';
 import '../../styles/styles.css';
 
 interface RegisterFormInputs {
-  username: string;
+  plat_username: string;
   password: string;
 }
 
 const RegisterForm: React.FC = () => {
   const [regUser, setRegUser] = useState<RegisterFormInputs>({
-    username: '',
+    plat_username: '',
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ const RegisterForm: React.FC = () => {
     event.preventDefault();
 
     const response = await Axios.post(`${API_URL}/auth/register`, {
-      username: regUser.username,
+      plat_username: regUser.plat_username,
       password: regUser.password,
     })
       .then((resp) => {
@@ -37,12 +37,12 @@ const RegisterForm: React.FC = () => {
       <h2>Register</h2>
       <form id="form-register" onSubmit={handleSubmit}>
         <input
-          id="input-register-username"
+          id="input-register-plat_username"
           type="text"
           placeholder="Username"
-          value={regUser.username}
+          value={regUser.plat_username}
           onChange={(e) =>
-            setRegUser({ ...regUser, username: e.target.value })
+            setRegUser({ ...regUser, plat_username: e.target.value })
           }
         />
         <input

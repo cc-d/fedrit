@@ -1,16 +1,16 @@
 export interface Platform {
     id?: string;
-    name?: string;
-    domain?: string;
+    uuid?: string;
+    url?: string;
     createdAt?: string;
     updatedAt?: string;
-    host?: boolean;
+    isHost?: boolean;
 }
 
 export interface PlatformUser {
     id?: string;
     platform?: Platform;
-    originUsername?: string;
+    platUsername?: string;
     createdAt?: string;
     updatedAt?: string;
     username: string;
@@ -56,5 +56,7 @@ export interface PlatUserToken {
     user: PlatformUser;
     platform: Platform;
     token?: string;
+}
+
 }
 
