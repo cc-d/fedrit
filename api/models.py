@@ -31,9 +31,6 @@ class PGPKey(models.Model):
     def __repr__(self):
         return f'<PGPKey {self.fingerprint}>'
 
-
-
-
 class Platform(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
